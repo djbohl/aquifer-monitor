@@ -355,102 +355,6 @@ const SCENARIOS = {
   }
 };
 
-// Virginia water use by sector (MGD = million gallons/day, source: USGS/Virginia DEQ)
-const WATER_SECTORS = [
-  { id: 'thermoelectric', name: 'Thermoelectric Power', mgd: 4800, color: '#F4A261', pct: 54, note: 'Largest single sector. Power plants for data centers included here.' },
-  { id: 'agriculture',   name: 'Agriculture / Irrigation', mgd: 1200, color: '#2EC4B6', pct: 14, note: 'Crop irrigation, livestock, aquaculture. Seasonal peaks.' },
-  { id: 'municipal',     name: 'Municipal / Public Supply', mgd: 900,  color: '#4895EF', pct: 10, note: '~8.7M Virginia residents. ~100 gal/person/day.' },
-  { id: 'industrial',    name: 'Industrial / Manufacturing', mgd: 700, color: '#9B5DE5', pct: 8,  note: 'Self-supplied industrial processes.' },
-  { id: 'datacenters',   name: 'Data Centers (est.)', mgd: 500,  color: '#E63946', pct: 6,  note: 'Estimated. No mandatory reporting. N. Virginia ~1.85B gal/yr = ~5M gal/day.' },
-  { id: 'mining',        name: 'Mining / Other', mgd: 350, color: '#E9C46A', pct: 4,  note: 'Sand, gravel, quarrying operations.' },
-  { id: 'domestic',      name: 'Domestic Self-Supply', mgd: 350, color: '#8A9BB0', pct: 4,  note: 'Wells, private supplies not on public system.' },
-];
-
-// Planned / approved data center expansions (2026–2035)
-const EXPANSIONS = [
-  {
-    name: 'Google — Virginia (Loudoun + Prince William + Chesterfield)',
-    year: '2026–2027', mw: 2000, investment: '$9B',
-    waterImpact: 'High — evaporative cooling legacy sites',
-    cooling: 'Mixed (legacy + new closed-loop)',
-    lat: 39.05, lng: -77.48, color: '#4895EF',
-    desc: 'Google committed $9B through end of 2026. New Chesterfield campus + Loudoun/Prince William expansions. Announced Feb 2026.'
-  },
-  {
-    name: 'CleanArc VA1 — Caroline County (Fredericksburg)',
-    year: '2027–2035', mw: 900, investment: '$3B',
-    waterImpact: 'Low — closed-loop systems committed',
-    cooling: 'Closed-loop ✓',
-    lat: 38.01, lng: -77.41, color: '#2EC4B6',
-    desc: '900 MW in 3 phases. Groundbreaking Q4 2025. Uses closed-loop systems. First 300MW online 2027, next 2030, final 2033–35.'
-  },
-  {
-    name: 'Vantage — Stafford County',
-    year: '2027', mw: 300, investment: '$2B',
-    waterImpact: 'Medium — under review',
-    cooling: 'TBD',
-    lat: 38.47, lng: -77.41, color: '#F4A261',
-    desc: '$2B three-building campus. First building late 2027. Expands Vantage statewide capacity to 782MW.'
-  },
-  {
-    name: 'Stack Infrastructure — Spotsylvania / Fredericksburg',
-    year: '2027–2028', mw: 432, investment: '$302M+',
-    waterImpact: 'Medium — under review',
-    cooling: 'TBD',
-    lat: 38.19, lng: -77.49, color: '#9B5DE5',
-    desc: 'Land purchased Jan 2025 for $302.3M. First phase live 2027. 432 MW potential via Rappahannock Electric.'
-  },
-  {
-    name: 'Stack Infrastructure — Berry Hill Megasite (Danville)',
-    year: '2027–2031', mw: 5000, investment: '$73.5B',
-    waterImpact: 'Very High — largest planned project in US history',
-    cooling: 'Unknown',
-    lat: 36.71, lng: -79.39, color: '#E63946',
-    desc: 'Potentially $73.5B over 30 years. 1,000+ acre phase 1 by June 2027. Largest economic investment ever proposed in Virginia. Water impact completely unstudied.'
-  },
-  {
-    name: 'EdgeCore — Culpeper County',
-    year: '2028', mw: 432, investment: 'N/A',
-    waterImpact: 'Very Low — closed-loop committed (WUE < 0.01)',
-    cooling: 'Closed-loop air-cooled ✓',
-    lat: 38.47, lng: -77.99, color: '#2EC4B6',
-    desc: 'Water-use effectiveness below 0.01 L/kWh committed. Model for what water-free looks like at scale.'
-  },
-  {
-    name: 'AVAIO — Appomattox County',
-    year: '2027–2028', mw: 200, investment: '$65M+ tax revenue',
-    waterImpact: 'Unknown',
-    cooling: 'Under community review',
-    lat: 37.35, lng: -78.84, color: '#E9C46A',
-    desc: 'Proposed 452-acre campus. Community meeting March 24 2026. Mixed reactions from residents. Construction planned 2027–2028.'
-  },
-];
-
-// Water source types in Northern Virginia
-const WATER_SOURCES = [
-  { name: 'Potomac River (Surface)', pct: 52, color: '#4895EF', risk: 'Moderate', note: 'Primary source for most N. Virginia utilities' },
-  { name: 'Potomac Aquifer (Groundwater)', pct: 28, color: '#9B5DE5', risk: 'Critical', note: '200ft decline measured. Potentially non-renewable.' },
-  { name: 'Reclaimed/Treated Wastewater', pct: 12, color: '#2EC4B6', risk: 'Low', note: 'Loudoun Water: 736M gal/yr reclaimed to data centers in 2024' },
-  { name: 'Other Groundwater', pct: 8, color: '#E9C46A', risk: 'High', note: 'Shallow aquifers, local wells. Increasingly stressed.' },
-];
-
-// Pollution / contamination factors
-const POLLUTION_FACTORS = [
-  { name: 'PFAS Contamination', severity: 72, color: '#E63946', note: 'Widespread in VA groundwater. Data centers use PFAS-containing firefighting foam.' },
-  { name: 'Saltwater Intrusion Risk', severity: 65, color: '#F4A261', note: 'Aquifer drawdown allows saltwater migration. Hampton Roads already affected.' },
-  { name: 'Nitrate / Agricultural Runoff', severity: 48, color: '#E9C46A', note: 'Chesapeake Bay watershed. Fertilizer contamination of shallow groundwater.' },
-  { name: 'Thermal Pollution', severity: 35, color: '#9B5DE5', note: 'Heated discharge from cooling systems affects river ecosystems.' },
-  { name: 'Heavy Metal Leaching', severity: 22, color: '#8A9BB0', note: 'Industrial and mining operations in upper watershed.' },
-];
-
-// Virginia population projections
-const VA_POPULATION = [
-  { year: 2020, pop: 8.63 }, { year: 2024, pop: 8.92 },
-  { year: 2026, pop: 9.05 }, { year: 2030, pop: 9.35 },
-  { year: 2035, pop: 9.75 }, { year: 2040, pop: 10.1 },
-  { year: 2050, pop: 10.8 }, { year: 2060, pop: 11.4 },
-];
-
 const DATA_SOURCES = [
   { name: 'USGS NWIS Instantaneous Values (GW)', type: 'type-m', typeLabel: 'MEASUREMENT', desc: 'Real-time well readings via USGS NWIS (depth to water). Pulled through a local proxy to avoid CORS.' },
   { name: 'USGS Groundwater Studies', type: 'type-e', typeLabel: 'EVIDENCE', desc: 'Regional hydrogeology, recharge dynamics, subsidence and saltwater intrusion studies.' },
@@ -529,6 +433,7 @@ function expansionsToGeoJSON(expansions = []) {
 
 const GROWTH_AI_MULT = 28.0 / 15.8
 const GROWTH_MANAGED_MULT = 4.0 / 15.8
+const EMPTY_ARR = []
 function computeScenarioGrowths(baseGrowth) {
   const base = baseGrowth ?? 0
   return {
@@ -542,7 +447,7 @@ function computeScenarioGrowths(baseGrowth) {
 export default function AquiferMonitor() {
   const [activeRegion, setActiveRegion] = useState('virginia')
   const region = REGIONS[activeRegion]
-  const { wellData, loading, error, lastUpdated } = useUSGSData({ sites: region?.wellSites || [] })
+  const { wellData, loading, error, lastUpdated, stats } = useUSGSData({ sites: region?.wellSites || [] })
 
   const [scenario, setScenario] = useState('current');
   const scenarioGrowths = useMemo(() => {
@@ -575,8 +480,11 @@ export default function AquiferMonitor() {
   const depletionCanvasRef = useRef(null);
   const populationCanvasRef = useRef(null);
 
-  const expansions = region?.expansions?.length ? region.expansions : EXPANSIONS
-  const waterSources = region?.waterSources?.length ? region.waterSources : WATER_SOURCES
+  const expansions = useMemo(() => region?.expansions ?? EMPTY_ARR, [region?.expansions])
+  const waterSources = useMemo(() => region?.waterSources ?? EMPTY_ARR, [region?.waterSources])
+  const waterSectors = useMemo(() => region?.waterSectors ?? EMPTY_ARR, [region?.waterSectors])
+  const pollutionFactors = useMemo(() => region?.pollutionFactors ?? EMPTY_ARR, [region?.pollutionFactors])
+  const populationSeries = useMemo(() => region?.population ?? EMPTY_ARR, [region?.population])
 
   const selectRegion = useCallback((regionId) => {
     const nextRegion = REGIONS[regionId]
@@ -867,6 +775,24 @@ useEffect(() => {
   // ── CHARTS ───────────────────────────────────────────────────────────────────
   const drawCharts = useCallback(() => {
     // Simple canvas chart renderer (no external chart library needed)
+    const drawEmpty = (canvas, msg) => {
+      if (!canvas) return
+      const W = canvas.parentElement?.offsetWidth - 28 || 600
+      const H = 160
+      canvas.width = W * window.devicePixelRatio
+      canvas.height = H * window.devicePixelRatio
+      canvas.style.width = W + 'px'
+      canvas.style.height = H + 'px'
+      const ctx = canvas.getContext('2d')
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio)
+      ctx.fillStyle = '#0E1318'
+      ctx.fillRect(0, 0, W, H)
+      ctx.fillStyle = '#5A7080'
+      ctx.font = '10px Space Mono, monospace'
+      ctx.textAlign = 'center'
+      ctx.fillText(msg, W / 2, H / 2)
+    }
+
     const drawLine = (canvas, datasets, labels, opts = {}) => {
       if (!canvas) return;
       const W = canvas.parentElement?.offsetWidth - 28 || 600;
@@ -950,10 +876,14 @@ useEffect(() => {
     });
 
     // Population chart
-    drawLine(populationCanvasRef.current, [
-      { label: 'VA Population (M)', data: VA_POPULATION.map(p => p.pop), color: '#4895EF' },
-    ], VA_POPULATION.map(p => p.year), { height: 160 });
-  }, [model, depletionCanvasRef, populationCanvasRef]);
+    if (populationSeries.length >= 2) {
+      drawLine(populationCanvasRef.current, [
+        { label: `${region?.shortName || region?.name} Population (M)`, data: populationSeries.map(p => p.pop), color: '#4895EF' },
+      ], populationSeries.map(p => p.year), { height: 160 });
+    } else {
+      drawEmpty(populationCanvasRef.current, 'No population series for this region')
+    }
+  }, [model, depletionCanvasRef, populationCanvasRef, populationSeries, region]);
 
   useEffect(() => {
     if (activeView !== 'charts') return;
@@ -1027,9 +957,9 @@ Population Growth: ${params.popGrowth}%/yr
 Pollution Capacity Reduction: ${params.pollutionFactor}%
 Effective Aquifer Capacity: ${model.effectiveCapacity}B gal
 
-WATER SECTOR BREAKDOWN (Virginia, MGD)
+WATER SECTOR BREAKDOWN (${region?.shortName || region?.name}, MGD)
 ═══════════════════════════════════════
-${WATER_SECTORS.map(s => `${s.name}: ${s.mgd} MGD (${s.pct}%)`).join('\n')}
+${waterSectors.length ? waterSectors.map(s => `${s.name}: ${s.mgd} MGD (${s.pct}%)`).join('\n') : 'N/A'}
 
 PLANNED EXPANSION PROJECTS (2026-2035)
 ═══════════════════════════════════════
@@ -1037,14 +967,9 @@ ${expansions.map(e => `${e.name}\n  Timeline: ${e.year} | ${e.mw}MW | ${e.invest
 
 DATA SOURCES
 ════════════
-- USGS NWIS Virginia Groundwater Data
-- Virginia JLARC Data Center Study (2024)
-- Virginia DEQ Annual Water Resources Report (2024)
-- Financial Times FOIA Data (2024): 1.85B gal/yr N. Virginia DC consumption
-- Broadband Breakfast / Dateline Ashburn (Sept 2025)
-- Construction Dive: CleanArc, Vantage, Stack announcements (2025-2026)
-- USGS Scientific Investigations Report 2013-5116
-- E&E News: State water legislation tracking (2025)
+- USGS NWIS Instantaneous Values (groundwater)
+- Public utility / regulator reports (region-specific where available)
+- Public project announcements, permits, and filings
 
 TRANSPARENCY NOTE
 ═════════════════
@@ -1060,7 +985,7 @@ For more information:
 `], { type: 'text/plain' });
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
     a.download = `aquifer-crisis-report-${new Date().toISOString().split('T')[0]}.txt`; a.click();
-  }, [model, params, scenario, yearsLeft, region, expansions]);
+  }, [model, params, scenario, yearsLeft, region, expansions, waterSectors]);
 
   // ── RENDER ───────────────────────────────────────────────────────────────────
   return (
@@ -1125,12 +1050,30 @@ For more information:
             <div className="panel-section">
               <div className="section-header">Model Parameters</div>
               {[
-                { key: 'consumption', label: 'Annual DC Consumption', min: 0.5, max: 8, step: 0.1, unit: 'B gal/yr', desc: 'N. Virginia data centers (2023 measured: ~1.85B gal, est. +15% unreported)' },
-                { key: 'growth', label: 'Annual Growth Rate', min: 0, max: 40, step: 0.5, unit: '%', desc: '2019–2023 CAGR was ~13%. Adjusted per scenario.' },
+                {
+                  key: 'consumption',
+                  label: 'Annual DC Consumption',
+                  min: 0.5,
+                  max: 500,
+                  step: 0.1,
+                  unit: 'B gal/yr',
+                  desc: `${region?.shortName || region?.name} data centers${region?.facts?.consumption2023 ? ` (est: ${region.facts.consumption2023})` : ''}${region?.facts?.mandatoryReporting === false ? '. No mandatory reporting.' : ''}`
+                },
+                { key: 'growth', label: 'Annual Growth Rate', min: 0, max: 60, step: 0.5, unit: '%', desc: 'Baseline comes from the selected region. Scenarios adjust this value.' },
                 { key: 'capacity', label: 'Aquifer Usable Capacity', min: 200, max: 2000, step: 25, unit: 'B gal', desc: 'Est. remaining freshwater before saltwater intrusion becomes critical.' },
-                { key: 'recharge', label: 'Annual Recharge Rate', min: 0, max: 2, step: 0.05, unit: 'B gal/yr', desc: 'Only 1"/43" rain reaches deep layers. Lower Potomac may be non-renewable.' },
+                {
+                  key: 'recharge',
+                  label: 'Annual Recharge Rate',
+                  min: 0,
+                  max: 20,
+                  step: 0.05,
+                  unit: 'B gal/yr',
+                  desc: region?.facts?.aquiferRenewable === false
+                    ? 'Recharge to deep groundwater is effectively non-renewable on human time scales.'
+                    : 'Recharge varies by basin; this slider controls the annual offset to withdrawals.'
+                },
                 { key: 'dcPct', label: 'Data Center % of Total Use', min: 5, max: 60, step: 1, unit: '%', desc: 'Estimated share of regional water. No mandatory reporting — this is inferred.' },
-                { key: 'popGrowth', label: 'Population Growth Rate', min: 0, max: 3, step: 0.1, unit: '%/yr', desc: 'Virginia pop. 9.05M in 2026. Each +1M people = +37B gal/yr additional demand.' },
+                { key: 'popGrowth', label: 'Population Growth Rate', min: 0, max: 4, step: 0.1, unit: '%/yr', desc: 'Each +1M people ≈ +37B gal/yr (at ~100 gpd). Regional baseline differs.' },
                 { key: 'pollutionFactor', label: 'Pollution Capacity Reduction', min: 0, max: 40, step: 1, unit: '%', desc: 'PFAS contamination, saltwater intrusion, nitrates reduce effective usable volume.' },
               ].map(({ key, label, min, max, step, unit, desc }) => (
                 <div key={key} className="slider-group">
@@ -1169,38 +1112,60 @@ For more information:
                 </div>
                 <div className="stat-cell">
                   <div className="stat-cell-label">Subsidence</div>
-                  <div className="stat-cell-value c-red">6mm</div>
-                  <div className="stat-cell-unit">/ yr (measured)</div>
+                  <div className="stat-cell-value c-red">{region?.facts?.subsidenceRate || '—'}</div>
+                  <div className="stat-cell-unit">reported</div>
                 </div>
                 <div className="stat-cell">
                   <div className="stat-cell-label">Decline Measured</div>
-                  <div className="stat-cell-value c-orange">200ft</div>
-                  <div className="stat-cell-unit">USGS confirmed</div>
+                  <div className="stat-cell-value c-orange">{region?.facts?.measuredDecline || '—'}</div>
+                  <div className="stat-cell-unit">reported</div>
+                </div>
+                <div className="stat-cell">
+                  <div className="stat-cell-label">USGS Avg Depth</div>
+                  <div className="stat-cell-value c-green">{stats?.avgDepth ? `${stats.avgDepth}ft` : '—'}</div>
+                  <div className="stat-cell-unit">{stats?.totalWells ? `${stats.totalWells} wells` : 'depth to water'}</div>
+                </div>
+                <div className="stat-cell">
+                  <div className="stat-cell-label">USGS Deepest</div>
+                  <div className="stat-cell-value c-purple">{typeof stats?.deepestWell?.depthToWater === 'number' ? `${stats.deepestWell.depthToWater.toFixed(1)}ft` : '—'}</div>
+                  <div className="stat-cell-unit">{stats?.deepestWell?.name ? stats.deepestWell.name.substring(0, 18) : 'depth to water'}</div>
                 </div>
               </div>
             </div>
 
             <div className="panel-section">
-              <div className="section-header">Water Sectors — Virginia</div>
-              {WATER_SECTORS.map(s => (
-                <div key={s.id} className="sector-bar-row">
-                  <div className="sector-bar-header">
-                    <span className="sector-bar-name">{s.name}</span>
-                    <span className="sector-bar-val">{s.pct}% · {s.mgd}MGD</span>
-                  </div>
-                  <div className="sector-bar-track">
-                    <div className="sector-bar-fill" style={{ width: `${s.pct * 1.7}%`, background: s.color }} />
-                  </div>
+              <div className="section-header">Water Sectors — {region?.shortName || region?.name}</div>
+              {waterSectors.length === 0 ? (
+                <div className="note-box">
+                  <strong>NOTE</strong> Sector breakdown not available for this region yet.
                 </div>
-              ))}
-              <div className="note-box">
-                <strong>⚠ NOTE</strong> Thermoelectric power (54%) includes power plants serving data centers indirectly. Data Center direct use (~6%) is vastly underreported due to no mandatory reporting law. Actual share likely 15–25%.
-              </div>
+              ) : (
+                <>
+                  {waterSectors.map(s => (
+                    <div key={s.id || s.name} className="sector-bar-row">
+                      <div className="sector-bar-header">
+                        <span className="sector-bar-name">{s.name}</span>
+                        <span className="sector-bar-val">{s.pct}% · {s.mgd}MGD</span>
+                      </div>
+                      <div className="sector-bar-track">
+                        <div className="sector-bar-fill" style={{ width: `${s.pct * 1.7}%`, background: s.color }} />
+                      </div>
+                    </div>
+                  ))}
+                  <div className="note-box">
+                    <strong>⚠ NOTE</strong> Thermoelectric power can include power plants serving data centers indirectly. Data center direct use is often underreported without mandatory reporting.
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="panel-section">
               <div className="section-header">Pollution Factors</div>
-              {POLLUTION_FACTORS.map(p => (
+              {pollutionFactors.length === 0 ? (
+                <div className="note-box">
+                  <strong>NOTE</strong> Pollution factor breakdown not available for this region yet.
+                </div>
+              ) : pollutionFactors.map(p => (
                 <div key={p.name} className="pollution-meter">
                   <div className="pm-header">
                     <span className="pm-name">{p.name}</span>
@@ -1251,7 +1216,7 @@ For more information:
                   <canvas ref={depletionCanvasRef} />
                 </div>
                 <div className="chart-card">
-                  <div className="chart-card-title">Virginia Population Growth (M)</div>
+                  <div className="chart-card-title">Population Growth (M) — {region?.shortName || region?.name}</div>
                   <canvas ref={populationCanvasRef} />
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>

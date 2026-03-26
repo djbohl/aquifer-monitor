@@ -36,6 +36,32 @@ export const REGIONS = {
         aquiferRenewable: false,   // Cretaceous-era water, effectively non-renewable
         mandatoryReporting: false,
       },
+
+      // Optional: sector context + risk factors (used by UI panels)
+      waterSectors: [
+        { id: 'thermoelectric', name: 'Thermoelectric Power', mgd: 4800, color: '#F4A261', pct: 54, note: 'Largest single sector. Power plants for data centers included here.' },
+        { id: 'agriculture', name: 'Agriculture / Irrigation', mgd: 1200, color: '#2EC4B6', pct: 14, note: 'Crop irrigation, livestock, aquaculture. Seasonal peaks.' },
+        { id: 'municipal', name: 'Municipal / Public Supply', mgd: 900, color: '#4895EF', pct: 10, note: '~8.7M Virginia residents. ~100 gal/person/day.' },
+        { id: 'industrial', name: 'Industrial / Manufacturing', mgd: 700, color: '#9B5DE5', pct: 8, note: 'Self-supplied industrial processes.' },
+        { id: 'datacenters', name: 'Data Centers (est.)', mgd: 500, color: '#E63946', pct: 6, note: 'Estimated. No mandatory reporting. N. Virginia ~1.85B gal/yr ≈ ~5M gal/day.' },
+        { id: 'mining', name: 'Mining / Other', mgd: 350, color: '#E9C46A', pct: 4, note: 'Sand, gravel, quarrying operations.' },
+        { id: 'domestic', name: 'Domestic Self-Supply', mgd: 350, color: '#8A9BB0', pct: 4, note: 'Wells, private supplies not on public system.' },
+      ],
+
+      pollutionFactors: [
+        { name: 'PFAS Contamination', severity: 72, color: '#E63946', note: 'Widespread in VA groundwater. Data centers use PFAS-containing firefighting foam.' },
+        { name: 'Saltwater Intrusion Risk', severity: 65, color: '#F4A261', note: 'Aquifer drawdown allows saltwater migration. Hampton Roads already affected.' },
+        { name: 'Nitrate / Agricultural Runoff', severity: 48, color: '#E9C46A', note: 'Chesapeake Bay watershed. Fertilizer contamination of shallow groundwater.' },
+        { name: 'Thermal Pollution', severity: 35, color: '#9B5DE5', note: 'Heated discharge from cooling systems affects river ecosystems.' },
+        { name: 'Heavy Metal Leaching', severity: 22, color: '#8A9BB0', note: 'Industrial and mining operations in upper watershed.' },
+      ],
+
+      population: [
+        { year: 2020, pop: 8.63 }, { year: 2024, pop: 8.92 },
+        { year: 2026, pop: 9.05 }, { year: 2030, pop: 9.35 },
+        { year: 2035, pop: 9.75 }, { year: 2040, pop: 10.1 },
+        { year: 2050, pop: 10.8 }, { year: 2060, pop: 11.4 },
+      ],
   
       // USGS well site IDs for real-time data
       wellSites: [
