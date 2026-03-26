@@ -1,0 +1,1251 @@
+{
+  "generatedAt": "2026-03-26T14:55:00.151Z",
+  "sources": [
+    {
+      "id": "usgs-ogc-monitoring-locations",
+      "name": "USGS OGC API – monitoring-locations",
+      "url": "https://api.waterdata.usgs.gov/ogcapi/v0/collections/monitoring-locations/items"
+    },
+    {
+      "id": "census-acs1-b01003",
+      "name": "US Census Bureau – ACS 1-year (B01003 Total Population)",
+      "url": "https://api.census.gov/data.html"
+    },
+    {
+      "id": "osm-overpass",
+      "name": "OpenStreetMap via Overpass API (data center tags)",
+      "url": "https://overpass-api.de/api/interpreter"
+    }
+  ],
+  "regions": {
+    "massachusetts": {
+      "center": [
+        -70.63055385603882,
+        41.3957133596493
+      ],
+      "wellSites": [
+        {
+          "id": "USGS-411438070054001",
+          "name": "MA-NBW  330 WELL  1",
+          "lat": 41.2440657988603,
+          "lng": -70.0938964040254,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-411438070055301",
+          "name": "MA-NBW  332 WELL 1",
+          "lat": 41.2441213857061,
+          "lng": -70.0973770230761,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-411526070071601",
+          "name": "MA-NBW  327 GW-1",
+          "lat": 41.25746569470921,
+          "lng": -70.12080253350781,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-411532070074701",
+          "name": "MA-NBW  334 BARTLETT WELL 2",
+          "lat": 41.259282376340785,
+          "lng": -70.12934991119839,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-411542070045201",
+          "name": "MA-NBW  327 STATE FOREST WELL 3",
+          "lat": 41.26186241570838,
+          "lng": -70.08066292894642,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-411556070073401",
+          "name": "MA-NBW  333 BARTLETT WELL 1",
+          "lat": 41.26567934953301,
+          "lng": -70.12584707769588,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-411611070045401",
+          "name": "MA-NBW  329 WELL 16",
+          "lat": 41.2698316131685,
+          "lng": -70.0812379481099,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-411614069584301",
+          "name": "MA-NBW  342 NGC WELL 1",
+          "lat": 41.27092809956293,
+          "lng": -69.97814423847592,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-411623070041701",
+          "name": "MA-NBW  328 NORTH PASTURE WELL4",
+          "lat": 41.27312586943555,
+          "lng": -70.07096832293534,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-411635069580601",
+          "name": "MA-NBW  344 PUMP 2",
+          "lat": 41.27678071059855,
+          "lng": -69.96804119935551,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-411725069581201",
+          "name": "MA-NBW  333 WELL 1",
+          "lat": 41.2903859043645,
+          "lng": -69.9693412608343,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-411734070090901",
+          "name": "MA-NBW  331 WELL  1",
+          "lat": 41.29290916280369,
+          "lng": -70.15182257463894,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412028070443401",
+          "name": "MA-CNW   48 WELL 1",
+          "lat": 41.3411910627586,
+          "lng": -70.7421278272286,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412029070444601",
+          "name": "MA-CNW   42 WELL  1",
+          "lat": 41.34145486767823,
+          "lng": -70.74548897281818,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412031070444301",
+          "name": "MA-CNW   41 WELL  1",
+          "lat": 41.3419548678381,
+          "lng": -70.7448084195356,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412032070443501",
+          "name": "MA-CNW   46 WELL  1",
+          "lat": 41.3422632406054,
+          "lng": -70.7426417386294,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412049070501401",
+          "name": "MA-GBW    5 WELL  1",
+          "lat": 41.34714454747348,
+          "lng": -70.83663919043158,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412049070501402",
+          "name": "MA-WT CYR 1A",
+          "lat": 42.01623055555556,
+          "lng": -71.04931944444444,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412105070453101",
+          "name": "MA-CNW   37 WELL  2",
+          "lat": 41.3516070820091,
+          "lng": -70.7580172370769,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412105070453102",
+          "name": "MA-CNW   38 WELL  3",
+          "lat": 41.3516015270554,
+          "lng": -70.7579950140315,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412113070453501",
+          "name": "MA-CNW   43 WELL  1",
+          "lat": 41.353781992851545,
+          "lng": -70.75926175882273,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412116070452301",
+          "name": "MA-CNW   39 WELL  1",
+          "lat": 41.3544487065199,
+          "lng": -70.7558394353324,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412117070452701",
+          "name": "MA-CNW   40 WELL  2",
+          "lat": 41.3548403383875,
+          "lng": -70.7570228140998,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412248070402301",
+          "name": "MA-XEW   53 WELL 3",
+          "lat": 41.380135712542,
+          "lng": -70.6725611706574,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412249070402901",
+          "name": "MA-XEW   47 WELL  1",
+          "lat": 41.3805051091529,
+          "lng": -70.6743000815587,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412252070402301",
+          "name": "MA-XEW   54 WELL 2",
+          "lat": 41.3813106699171,
+          "lng": -70.6726306348205,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412252070402401",
+          "name": "MA-XEW   55 WELL 1",
+          "lat": 41.3812995541402,
+          "lng": -70.6728834147471,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412255070403001",
+          "name": "MA-XEW   48 WELL  1",
+          "lat": 41.3821050495802,
+          "lng": -70.6744806647773,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412302070392101",
+          "name": "MA-XEW   43 WELL  1  MAP 31 LOT 39.1",
+          "lat": 41.3840775816268,
+          "lng": -70.6553694092595,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412305070393501",
+          "name": "MA-XEW   56 WELL 1",
+          "lat": 41.3849219189029,
+          "lng": -70.6592444586738,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412305070393502",
+          "name": "MA-XEW   57 WELL 2",
+          "lat": 41.3848941431672,
+          "lng": -70.6591916799598,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412307070301301",
+          "name": "MA-ENW   85 WELL  1",
+          "lat": 41.3852416576986,
+          "lng": -70.503079131796,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412317070422301",
+          "name": "MA-CNW   44 OLD WELL",
+          "lat": 41.3880625605071,
+          "lng": -70.7058699411494,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412317070422302",
+          "name": "MA-CNW   45 NEW WELL",
+          "lat": 41.388048671804,
+          "lng": -70.7058838299382,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412336070332301",
+          "name": "MA-ENW   84 IRRIGATION WELL",
+          "lat": 41.393545812507995,
+          "lng": -70.55608530552652,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412343070422701",
+          "name": "MA-CNW   47 WELL 1",
+          "lat": 41.3953511904418,
+          "lng": -70.7068589592279,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412355070403801",
+          "name": "MA-XEW   51 WELL 1",
+          "lat": 41.3986544291389,
+          "lng": -70.6766892876569,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412403070395001",
+          "name": "MA-XEW   52 WELL 1",
+          "lat": 41.400818490922,
+          "lng": -70.6634391990216,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412410070341001",
+          "name": "MA-ENW   84 NUNNEPOG WELL",
+          "lat": 41.40292017273048,
+          "lng": -70.56899112675673,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412412070403401",
+          "name": "MA-XEW   49 WELL  1",
+          "lat": 41.4035265016802,
+          "lng": -70.6756115790335,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412415070403101",
+          "name": "MA-XEW   42 WELL  1",
+          "lat": 41.4041514961779,
+          "lng": -70.6747310253899,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412416070394201",
+          "name": "MA-XEW   44 WELL  1",
+          "lat": 41.404487845940636,
+          "lng": -70.66119479290231,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412451070364801",
+          "name": "MA-OBW   38 JOHN H. RANDOLPH JR. WELL 5",
+          "lat": 41.414227251034546,
+          "lng": -70.6127750489649,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412512070395301",
+          "name": "MA-XEW   50 WELL 1",
+          "lat": 41.420026125682,
+          "lng": -70.6641895168396,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412551070394701",
+          "name": "MA-XEW   41 WELL 2",
+          "lat": 41.430992430995,
+          "lng": -70.6624341219718,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412558070394101",
+          "name": "MA-XEW   40 WELL  1",
+          "lat": 41.4328257259565,
+          "lng": -70.6608035804699,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412560070392601",
+          "name": "MA-XEW   46 WELL  2",
+          "lat": 41.43342021840278,
+          "lng": -70.65663410574989,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412601070392501",
+          "name": "MA-XEW   45 WELL  1",
+          "lat": 41.433672990877874,
+          "lng": -70.656403552066,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412816070365901",
+          "name": "MA-TOW   19 WELL AT MINK MEADOWS",
+          "lat": 41.47143608554344,
+          "lng": -70.61611487659135,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-412816070365902",
+          "name": "MA-TOW   20 Pressure Maint. Pump and well",
+          "lat": 41.47137775659551,
+          "lng": -70.6159648741933,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-413026071055701",
+          "name": "MA-XBW  252 WELL  2",
+          "lat": 41.5073455368122,
+          "lng": -71.0987841403319,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-413027071063401",
+          "name": "MA-XBW  251 WELL 3 DRILLED",
+          "lat": 41.5074760065776,
+          "lng": -71.1088817372424,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-413029071013001",
+          "name": "MA-XBW  272 WELL  1",
+          "lat": 41.5081322648515,
+          "lng": -71.0245925102889,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-413034071013801",
+          "name": "MA-XBW  289 WELL 1",
+          "lat": 41.50949890304111,
+          "lng": -71.0265703734083,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-413041071063101",
+          "name": "MA-XBW  283 WELL  1",
+          "lat": 41.51161209664329,
+          "lng": -71.10802061505467,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-413043071043801",
+          "name": "MA-XBW  301 WELL  2",
+          "lat": 41.5121179086533,
+          "lng": -71.0767027979328,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-413044071043901",
+          "name": "MA-XBW  300 WELL  1",
+          "lat": 41.5121984620332,
+          "lng": -71.0768916943004,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-413047071040701",
+          "name": "MA-XBW  275 WELL  1",
+          "lat": 41.5131679726748,
+          "lng": -71.068008040656,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-413047071040702",
+          "name": "MA-XBW  302 WELL 1",
+          "lat": 41.5131957502373,
+          "lng": -71.0680080408484,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-413047071043401",
+          "name": "MA-XBW  292 WELL  3",
+          "lat": 41.5130623542432,
+          "lng": -71.0757027673146,
+          "priority": "medium",
+          "aquifer": null
+        }
+      ],
+      "population": [
+        {
+          "year": 2010,
+          "pop": 6.56
+        },
+        {
+          "year": 2011,
+          "pop": 6.59
+        },
+        {
+          "year": 2012,
+          "pop": 6.65
+        },
+        {
+          "year": 2013,
+          "pop": 6.69
+        },
+        {
+          "year": 2014,
+          "pop": 6.75
+        },
+        {
+          "year": 2015,
+          "pop": 6.79
+        },
+        {
+          "year": 2016,
+          "pop": 6.81
+        },
+        {
+          "year": 2017,
+          "pop": 6.86
+        },
+        {
+          "year": 2018,
+          "pop": 6.9
+        },
+        {
+          "year": 2019,
+          "pop": 6.89
+        },
+        {
+          "year": 2021,
+          "pop": 6.98
+        },
+        {
+          "year": 2022,
+          "pop": 6.98
+        },
+        {
+          "year": 2023,
+          "pop": 7
+        },
+        {
+          "year": 2024,
+          "pop": 7.14
+        }
+      ],
+      "existingDCs": [
+        {
+          "lat": 42.3767059,
+          "lng": -71.0797577,
+          "name": "CoreSite BO1",
+          "size": 10,
+          "consumption": "Unknown"
+        },
+        {
+          "lat": 42.6857078,
+          "lng": -71.2086024,
+          "name": "TierPoint",
+          "size": 10,
+          "consumption": "Unknown"
+        },
+        {
+          "lat": 42.6302832,
+          "lng": -71.3045615,
+          "name": "Markley Data Center",
+          "size": 10,
+          "consumption": "Unknown"
+        }
+      ]
+    },
+    "florida": {
+      "center": [
+        -81.17940747972706,
+        25.720146311167436
+      ],
+      "wellSites": [
+        {
+          "id": "USGS-253032080302601",
+          "name": "WELL NO.1 - UNIVERSITY OF FLORIDA",
+          "lat": 25.5092766401863,
+          "lng": -80.5070018322089,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-255409080144401",
+          "name": "WELL NO.6 - OPA LOCKA",
+          "lat": 25.9028723615059,
+          "lng": -80.2453268675932,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-255414080145101",
+          "name": "WELL NO.1 - OPA LOCKA",
+          "lat": 25.9042612060822,
+          "lng": -80.2472713719146,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-255414080145102",
+          "name": "WELL NO.2 - OPA LOCKA",
+          "lat": 25.9042612060822,
+          "lng": -80.2472713719146,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-255414080145601",
+          "name": "WELL NO.7 - OPA LOCKA",
+          "lat": 25.9042612099208,
+          "lng": -80.2486603070662,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-255414080145602",
+          "name": "WELL NO.8 - OPA LOCKA",
+          "lat": 25.9042612099208,
+          "lng": -80.2486603070662,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-260029080102101",
+          "name": "WELL 13-A, HOLLYWOOD",
+          "lat": 26.0084238764606,
+          "lng": -80.1722686143905,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-262057080112901",
+          "name": "Well D-8",
+          "lat": 26.3495223714654,
+          "lng": -80.1911572748813,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-262121080090201",
+          "name": "Well D-14",
+          "lat": 26.3561887269964,
+          "lng": -80.1503226758122,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-263740081484001",
+          "name": "WELL 4 - FORT MYERS",
+          "lat": 26.6281283253734,
+          "lng": -81.8109179364119,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-263742081484001",
+          "name": "WELL 3 - FORT MYERS",
+          "lat": 26.6286838570282,
+          "lng": -81.8109179337563,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-263745081484001",
+          "name": "WELL 2 - FORT MYERS",
+          "lat": 26.6295171545104,
+          "lng": -81.8109179297729,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-263746081484001",
+          "name": "WELL 1 - FORT MYERS",
+          "lat": 26.6297949203379,
+          "lng": -81.8109179284451,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-264426081274801",
+          "name": "WELL NO.1 - LABELLE",
+          "lat": 26.7408997763537,
+          "lng": -81.4631320292002,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-264426081274802",
+          "name": "WELL NO.2 - LABELLE",
+          "lat": 26.7408997763537,
+          "lng": -81.4631320292002,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-265730080052201",
+          "name": "PB - 932",
+          "lat": 26.9586683699533,
+          "lng": -80.0892085804951,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-270050080265401",
+          "name": "WELL 1 - INDIANTOWN",
+          "lat": 27.0142206203702,
+          "lng": -80.4481073106474,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-270148080285401",
+          "name": "WELL 4 - INDIANTOWN",
+          "lat": 27.0303311067035,
+          "lng": -80.4814415768103,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-270151080275101",
+          "name": "WELL 2 - INDIANTOWN",
+          "lat": 27.0311644489665,
+          "lng": -80.4639411251714,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-270426080323801",
+          "name": "WELL 7 - INDIANTOWN",
+          "lat": 27.0742184574363,
+          "lng": -80.5436653913327,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-272811080204301",
+          "name": "Ft Pierce SA Well 15 AAH7970",
+          "lat": 27.4683333333333,
+          "lng": -80.3458888888889,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-252222080260101",
+          "name": "FKS 4",
+          "lat": 25.3729722222222,
+          "lng": -80.4336666666667,
+          "priority": "medium",
+          "aquifer": "112BSCNN"
+        },
+        {
+          "id": "USGS-255843081285201",
+          "name": "FL5110230 Port of the Is SA Well 3 AAO4486",
+          "lat": 25.97845,
+          "lng": -81.4885111111111,
+          "priority": "medium",
+          "aquifer": "S100SURFCL"
+        },
+        {
+          "id": "USGS-261152081472401",
+          "name": "FL5110198 Naples SA Well CR311 AAH0911",
+          "lat": 26.1975333333333,
+          "lng": -81.7898166666667,
+          "priority": "medium",
+          "aquifer": "S100SURFCL"
+        },
+        {
+          "id": "USGS-261417081324201",
+          "name": "FL5110198 Naples SA Well GG424 AAH9012",
+          "lat": 26.2380083333333,
+          "lng": -81.5451083333333,
+          "priority": "medium",
+          "aquifer": "S100SURFCL"
+        },
+        {
+          "id": "USGS-262548080125701",
+          "name": "FL4504285 Sun Meadows SA Well 1 AAH0589",
+          "lat": 26.4299722222222,
+          "lng": -80.2158055555556,
+          "priority": "medium",
+          "aquifer": "S100SURFCL"
+        },
+        {
+          "id": "USGS-262649080053901",
+          "name": "FL4500351 Delray Bch SA Well 27 AAH8957",
+          "lat": 26.4469166666667,
+          "lng": -80.0961388888889,
+          "priority": "medium",
+          "aquifer": "S100SURFCL"
+        },
+        {
+          "id": "USGS-263050080034601",
+          "name": "FL4500145 Boynton Bch SA Well 1E AAH2200",
+          "lat": 26.5139444444444,
+          "lng": -80.0625277777778,
+          "priority": "medium",
+          "aquifer": "S100SURFCL"
+        },
+        {
+          "id": "USGS-263452080032001",
+          "name": "FL4500784 Lantana SA Well 3 AAH1125",
+          "lat": 26.5813055555556,
+          "lng": -80.0553611111111,
+          "priority": "medium",
+          "aquifer": "S100SURFCL"
+        },
+        {
+          "id": "USGS-263952080135501",
+          "name": "FL4500014 Wellington SA Well RO1 AAH8882",
+          "lat": 26.6648611111111,
+          "lng": -80.2316111111111,
+          "priority": "medium",
+          "aquifer": "S100SURFCL"
+        },
+        {
+          "id": "USGS-264614080062901",
+          "name": "FL4501229 Riviera Bch SA Well 803 AAH0566",
+          "lat": 26.7704166666667,
+          "lng": -80.1080833333333,
+          "priority": "medium",
+          "aquifer": "S100SURFCL"
+        },
+        {
+          "id": "USGS-264822080051501",
+          "name": "FL4501124 Seacoast SA Well 24 AAH0514",
+          "lat": 26.8059444444444,
+          "lng": -80.0872777777778,
+          "priority": "medium",
+          "aquifer": "S100SURFCL"
+        },
+        {
+          "id": "USGS-265316082143001",
+          "name": "FL6080104 Gasparilla Is SA Well 5G AAI0087",
+          "lat": 26.8875638888889,
+          "lng": -82.2414361111111,
+          "priority": "medium",
+          "aquifer": "S100SURFCL"
+        },
+        {
+          "id": "USGS-265338082142801",
+          "name": "FL6080104 Gasparilla Is SA Well 4A AAH9917",
+          "lat": 26.8937833333333,
+          "lng": -82.2409111111111,
+          "priority": "medium",
+          "aquifer": "S100SURFCL"
+        },
+        {
+          "id": "USGS-274622080351101",
+          "name": "FELLSMERE SA WELL 1 AAF9007",
+          "lat": 27.7728888888889,
+          "lng": -80.5863055555556,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-02290829501",
+          "name": "MO  -198",
+          "lat": 25.4679777777778,
+          "lng": -80.8545277777778,
+          "priority": "medium",
+          "aquifer": "112BSCNN"
+        },
+        {
+          "id": "USGS-02290829502",
+          "name": "MO  -199",
+          "lat": 25.4679777777778,
+          "lng": -80.8545277777778,
+          "priority": "medium",
+          "aquifer": "112BSCNN"
+        },
+        {
+          "id": "USGS-242517082360201",
+          "name": "MO - 144",
+          "lat": 24.4218234914607,
+          "lng": -82.6003869718045,
+          "priority": "medium",
+          "aquifer": "120FLRD"
+        },
+        {
+          "id": "USGS-242610082293701",
+          "name": "MO - 142",
+          "lat": 24.4365446688984,
+          "lng": -82.4934403457705,
+          "priority": "medium",
+          "aquifer": "120FLRD"
+        },
+        {
+          "id": "USGS-243201082063101",
+          "name": "MO - 114",
+          "lat": 24.5340389678483,
+          "lng": -82.1084329815503,
+          "priority": "medium",
+          "aquifer": "120FLRD"
+        },
+        {
+          "id": "USGS-243205081470801",
+          "name": "F  - 605",
+          "lat": 24.5351476376374,
+          "lng": -81.7853689950799,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-243242081475901",
+          "name": "S  - 618",
+          "lat": 24.5454251715468,
+          "lng": -81.7995361282254,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-243252081475601",
+          "name": "F  - 640",
+          "lat": 24.5482028505142,
+          "lng": -81.7987027990319,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-243253081475101",
+          "name": "F  - 635",
+          "lat": 24.5484806090593,
+          "lng": -81.7973138760225,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-243258081472701",
+          "name": "F  - 643",
+          "lat": 24.549869403668,
+          "lng": -81.7906470458021,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-243258081475601",
+          "name": "F  - 639",
+          "lat": 24.5498694614607,
+          "lng": -81.7987028146986,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-243259081481101",
+          "name": "S  - 617",
+          "lat": 24.5501472598555,
+          "lng": -81.802869594356,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-243300081481501",
+          "name": "MO - 150",
+          "lat": 24.5504250363348,
+          "lng": -81.8039807375517,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-243303081471701",
+          "name": "S  - 611",
+          "lat": 24.5512582260523,
+          "lng": -81.787869207114,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-243305081470001",
+          "name": "S  - 612",
+          "lat": 24.5518137290119,
+          "lng": -81.7831468646479,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-243306081470001",
+          "name": "S  - 606",
+          "lat": 24.552091497462,
+          "lng": -81.7831468671441,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-243306081472901",
+          "name": "S  - 609",
+          "lat": 24.5520915554244,
+          "lng": -81.7912026365166,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-243306081473101",
+          "name": "S  - 608",
+          "lat": 24.5520915594218,
+          "lng": -81.7917582068181,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-243308081471101",
+          "name": "F  - 607",
+          "lat": 24.5526470563641,
+          "lng": -81.7862025088402,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-243308081474301",
+          "name": "MO - 153A",
+          "lat": 24.5526471203694,
+          "lng": -81.7950916337963,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-243308081474302",
+          "name": "MO - 153B",
+          "lat": 24.5526471203694,
+          "lng": -81.7950916337963,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-243308081475501",
+          "name": "F  - 632",
+          "lat": 24.5526471443713,
+          "lng": -81.7984250556549,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-243310081481001",
+          "name": "F  - 637",
+          "lat": 24.5532027113764,
+          "lng": -81.8025918382578,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-243311081472201",
+          "name": "S  - 601",
+          "lat": 24.5534803837645,
+          "lng": -81.7892581531679,
+          "priority": "medium",
+          "aquifer": null
+        },
+        {
+          "id": "USGS-243311081472301",
+          "name": "WELL 1125UNITED ST BIG PINE KEY FL",
+          "lat": 24.5534803857669,
+          "lng": -81.789535938329,
+          "priority": "medium",
+          "aquifer": null
+        }
+      ],
+      "population": [
+        {
+          "year": 2010,
+          "pop": 18.84
+        },
+        {
+          "year": 2011,
+          "pop": 19.06
+        },
+        {
+          "year": 2012,
+          "pop": 19.32
+        },
+        {
+          "year": 2013,
+          "pop": 19.55
+        },
+        {
+          "year": 2014,
+          "pop": 19.89
+        },
+        {
+          "year": 2015,
+          "pop": 20.27
+        },
+        {
+          "year": 2016,
+          "pop": 20.61
+        },
+        {
+          "year": 2017,
+          "pop": 20.98
+        },
+        {
+          "year": 2018,
+          "pop": 21.3
+        },
+        {
+          "year": 2019,
+          "pop": 21.48
+        },
+        {
+          "year": 2021,
+          "pop": 21.78
+        },
+        {
+          "year": 2022,
+          "pop": 22.24
+        },
+        {
+          "year": 2023,
+          "pop": 22.61
+        },
+        {
+          "year": 2024,
+          "pop": 23.37
+        }
+      ],
+      "existingDCs": [
+        {
+          "lat": 25.7915453,
+          "lng": -80.3177484,
+          "name": "NocRoom Miami IT Services",
+          "size": 10,
+          "consumption": "Unknown"
+        },
+        {
+          "lat": 25.6465617,
+          "lng": -80.4234346,
+          "name": "NocRoom Miami IT Services",
+          "size": 10,
+          "consumption": "Unknown"
+        },
+        {
+          "lat": 29.6728187,
+          "lng": -82.2997617,
+          "name": "HiPerGator",
+          "size": 10,
+          "consumption": "Unknown"
+        },
+        {
+          "lat": 30.2457482,
+          "lng": -81.5817226,
+          "name": "Flexential Jacksonville",
+          "size": 10,
+          "consumption": "Unknown"
+        },
+        {
+          "lat": 28.0372991,
+          "lng": -82.5399781,
+          "name": "Flexential Tampa - West",
+          "size": 10,
+          "consumption": "Unknown"
+        },
+        {
+          "lat": 29.6725909,
+          "lng": -82.2999288,
+          "name": "UF Research Computing Center",
+          "size": 10,
+          "consumption": "Unknown"
+        },
+        {
+          "lat": 25.7823886,
+          "lng": -80.1930798,
+          "name": "NAP of the Americas",
+          "size": 10,
+          "consumption": "Unknown"
+        },
+        {
+          "lat": 25.7975445,
+          "lng": -80.2300338,
+          "name": "OSM data center way/435531451",
+          "size": 10,
+          "consumption": "Unknown"
+        },
+        {
+          "lat": 30.3314298,
+          "lng": -81.6624257,
+          "name": "Cologix Jacksonville JAX1",
+          "size": 10,
+          "consumption": "Unknown"
+        },
+        {
+          "lat": 27.9455353,
+          "lng": -82.351102,
+          "name": "Cyxtera Tampa TP1",
+          "size": 10,
+          "consumption": "Unknown"
+        },
+        {
+          "lat": 28.6174494,
+          "lng": -81.3934606,
+          "name": "OSM data center way/609126465",
+          "size": 10,
+          "consumption": "Unknown"
+        },
+        {
+          "lat": 26.1900857,
+          "lng": -80.1932967,
+          "name": "Flexential Fort Lauderdale",
+          "size": 10,
+          "consumption": "Unknown"
+        },
+        {
+          "lat": 28.5779418,
+          "lng": -81.5645492,
+          "name": "E-Foam",
+          "size": 10,
+          "consumption": "Unknown"
+        },
+        {
+          "lat": 26.1849937,
+          "lng": -80.2868773,
+          "name": "T-Mobile Everglades MSO Data Center",
+          "size": 10,
+          "consumption": "Unknown"
+        },
+        {
+          "lat": 28.2940687,
+          "lng": -81.8348651,
+          "name": "OSM data center way/1034230196",
+          "size": 10,
+          "consumption": "Unknown"
+        },
+        {
+          "lat": 28.0738698,
+          "lng": -82.3683619,
+          "name": "Flexential Tampa - North",
+          "size": 10,
+          "consumption": "Unknown"
+        }
+      ]
+    }
+  }
+}

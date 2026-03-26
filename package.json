@@ -7,6 +7,10 @@
     "dev": "concurrently \"nodemon server/proxy.js\" \"vite\"",
     "dev:app": "vite",
     "dev:server": "nodemon server/proxy.js",
+    "ingest:state": "node scripts/ingest/ingest-state.mjs",
+    "ingest:usgs:wells": "node scripts/ingest/ingest-usgs-wells.mjs",
+    "ingest:census:population": "node scripts/ingest/ingest-census-population.mjs",
+    "ingest:osm:datacenters": "node scripts/ingest/ingest-osm-datacenters.mjs",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"

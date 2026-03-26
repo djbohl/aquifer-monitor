@@ -2,6 +2,21 @@
 // Sources: USGS, Ceres Report (Feb 2026), HARC/U of Houston,
 // WRI, Lincoln Institute, Texas Observer, Waterless Co.
 
+import ingested from './regions.ingested.json'
+
+function deepMerge(base, patch) {
+  if (patch == null) return base
+  if (Array.isArray(patch)) return patch
+  if (typeof patch !== 'object') return patch
+
+  const out = { ...(base && typeof base === 'object' && !Array.isArray(base) ? base : {}) }
+  for (const [k, v] of Object.entries(patch)) {
+    if (v === undefined) continue
+    out[k] = deepMerge(out[k], v)
+  }
+  return out
+}
+
 export const REGIONS = {
 
     virginia: {
@@ -480,7 +495,7 @@ export const REGIONS = {
       }
     },
   }
-  
+
   // ─── NATIONAL SUMMARY STATS ────────────────────────────────────────────────────
   export const NATIONAL_STATS = {
     totalDCs: 5500,           // As of Jan 2026 (datacentermap.com)
@@ -499,3 +514,118 @@ export const REGIONS = {
     WATER_TEMP: '00010',
     CHLORIDE: '00940',
   }
+
+// ─── STATE STUB REGIONS ────────────────────────────────────────────────────────
+// Adds every US state as a selectable region. These entries are placeholders until
+// you populate state-specific wells, expansions, zones, and water-source mixes.
+
+export const US_STATES = [
+  { name: 'Alabama', abbr: 'AL', id: 'alabama' },
+  { name: 'Alaska', abbr: 'AK', id: 'alaska' },
+  { name: 'Arizona', abbr: 'AZ', id: 'arizona' },
+  { name: 'Arkansas', abbr: 'AR', id: 'arkansas' },
+  { name: 'California', abbr: 'CA', id: 'california' },
+  { name: 'Colorado', abbr: 'CO', id: 'colorado' },
+  { name: 'Connecticut', abbr: 'CT', id: 'connecticut' },
+  { name: 'Delaware', abbr: 'DE', id: 'delaware' },
+  { name: 'Florida', abbr: 'FL', id: 'florida' },
+  { name: 'Georgia', abbr: 'GA', id: 'georgia' },
+  { name: 'Hawaii', abbr: 'HI', id: 'hawaii' },
+  { name: 'Idaho', abbr: 'ID', id: 'idaho' },
+  { name: 'Illinois', abbr: 'IL', id: 'illinois' },
+  { name: 'Indiana', abbr: 'IN', id: 'indiana' },
+  { name: 'Iowa', abbr: 'IA', id: 'iowa' },
+  { name: 'Kansas', abbr: 'KS', id: 'kansas' },
+  { name: 'Kentucky', abbr: 'KY', id: 'kentucky' },
+  { name: 'Louisiana', abbr: 'LA', id: 'louisiana' },
+  { name: 'Maine', abbr: 'ME', id: 'maine' },
+  { name: 'Maryland', abbr: 'MD', id: 'maryland' },
+  { name: 'Massachusetts', abbr: 'MA', id: 'massachusetts' },
+  { name: 'Michigan', abbr: 'MI', id: 'michigan' },
+  { name: 'Minnesota', abbr: 'MN', id: 'minnesota' },
+  { name: 'Mississippi', abbr: 'MS', id: 'mississippi' },
+  { name: 'Missouri', abbr: 'MO', id: 'missouri' },
+  { name: 'Montana', abbr: 'MT', id: 'montana' },
+  { name: 'Nebraska', abbr: 'NE', id: 'nebraska' },
+  { name: 'Nevada', abbr: 'NV', id: 'nevada' },
+  { name: 'New Hampshire', abbr: 'NH', id: 'new_hampshire' },
+  { name: 'New Jersey', abbr: 'NJ', id: 'new_jersey' },
+  { name: 'New Mexico', abbr: 'NM', id: 'new_mexico' },
+  { name: 'New York', abbr: 'NY', id: 'new_york' },
+  { name: 'North Carolina', abbr: 'NC', id: 'north_carolina' },
+  { name: 'North Dakota', abbr: 'ND', id: 'north_dakota' },
+  { name: 'Ohio', abbr: 'OH', id: 'ohio' },
+  { name: 'Oklahoma', abbr: 'OK', id: 'oklahoma' },
+  { name: 'Oregon', abbr: 'OR', id: 'oregon' },
+  { name: 'Pennsylvania', abbr: 'PA', id: 'pennsylvania' },
+  { name: 'Rhode Island', abbr: 'RI', id: 'rhode_island' },
+  { name: 'South Carolina', abbr: 'SC', id: 'south_carolina' },
+  { name: 'South Dakota', abbr: 'SD', id: 'south_dakota' },
+  { name: 'Tennessee', abbr: 'TN', id: 'tennessee' },
+  { name: 'Texas', abbr: 'TX', id: 'texas' },
+  { name: 'Utah', abbr: 'UT', id: 'utah' },
+  { name: 'Vermont', abbr: 'VT', id: 'vermont' },
+  { name: 'Virginia', abbr: 'VA', id: 'virginia' },
+  { name: 'Washington', abbr: 'WA', id: 'washington' },
+  { name: 'West Virginia', abbr: 'WV', id: 'west_virginia' },
+  { name: 'Wisconsin', abbr: 'WI', id: 'wisconsin' },
+  { name: 'Wyoming', abbr: 'WY', id: 'wyoming' },
+]
+
+const DEFAULT_STATE_CENTER = [-98.5795, 39.8283] // USA (approx)
+const DEFAULT_STATE_ZOOM = 4
+
+const DEFAULT_STATE_MODEL = {
+  consumption: 1.0,
+  growth: 8.0,
+  capacity: 800,
+  recharge: 1.0,
+  dcPct: 10,
+  popGrowth: 1.0,
+  pollutionFactor: 10,
+}
+
+for (const st of US_STATES) {
+  if (REGIONS[st.id]) continue
+  REGIONS[st.id] = {
+    id: st.id,
+    name: st.name,
+    shortName: st.abbr,
+    center: DEFAULT_STATE_CENTER,
+    zoom: DEFAULT_STATE_ZOOM,
+    crisisLevel: 'unknown',
+    aquifer: 'N/A',
+    state: st.abbr,
+    model: { ...DEFAULT_STATE_MODEL },
+    facts: {
+      dcCount: null,
+      globalTrafficPct: null,
+      measuredDecline: null,
+      subsidenceRate: null,
+      consumption2023: null,
+      consumptionGrowth: null,
+      aquiferRenewable: null,
+      mandatoryReporting: null,
+    },
+    wellSites: [],
+    existingDCs: [],
+    expansions: [],
+    depletionZones: [],
+    rechargeZones: [],
+    waterSources: [],
+    waterSectors: [],
+    pollutionFactors: [],
+    population: [],
+    legislation: {
+      status: 'Unknown',
+      detail: 'Not populated yet for this state.',
+      color: '#8A9BB0',
+    },
+  }
+}
+
+// Apply ingested patches (generated by scripts/ingest/*) without overwriting this file.
+for (const [regionId, patch] of Object.entries(ingested?.regions || {})) {
+  if (!REGIONS[regionId] || !patch) continue
+  REGIONS[regionId] = deepMerge(REGIONS[regionId], patch)
+}

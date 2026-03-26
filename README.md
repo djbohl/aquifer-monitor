@@ -51,6 +51,8 @@ The app fetches real-time groundwater readings through the local proxy:
 
 By default it requests parameter `72019` (“depth to water level below land surface, ft”).
 
+If a region has no `wellSites` configured, the app will attempt to auto-discover wells for that region’s state via `http://localhost:3001/api/usgs/groundwater` (OGC API monitoring locations) and use a capped subset for live reads.
+
 ## Configuration
 
 ### Proxy base URL
@@ -64,6 +66,14 @@ The default is `http://localhost:3001`.
 ## Adding / Updating Regions
 
 Regions live in `src/data/regions.js` under `REGIONS`.
+
+The repo also includes 50 state “stub” regions (minimal placeholders) so every state is selectable immediately. Populate wells/expansions/zones per state as you collect data.
+
+### Ingestion pipeline
+
+Machine-generated updates live in `src/data/regions.ingested.json` and are merged into `REGIONS` at runtime.
+
+Scripts and details: `scripts/ingest/README.md`.
 
 At minimum, a region should define:
 - `id`, `name`, `shortName`

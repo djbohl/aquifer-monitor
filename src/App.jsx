@@ -468,6 +468,15 @@ function expansionsToGeoJSON(expansions = []) {
   }
 }
 
+function averageCenterFromSites(sites = []) {
+  const pts = (sites || []).filter((s) => typeof s?.lat === 'number' && typeof s?.lng === 'number')
+  if (pts.length === 0) return null
+  const n = pts.length
+  const avgLng = pts.reduce((sum, p) => sum + p.lng, 0) / n
+  const avgLat = pts.reduce((sum, p) => sum + p.lat, 0) / n
+  return [avgLng, avgLat]
+}
+
 const GROWTH_AI_MULT = 28.0 / 15.8
 const GROWTH_MANAGED_MULT = 4.0 / 15.8
 const EMPTY_ARR = []
@@ -484,7 +493,11 @@ function computeScenarioGrowths(baseGrowth) {
 export default function AquiferMonitor() {
   const [activeRegion, setActiveRegion] = useState('virginia')
   const region = REGIONS[activeRegion]
-  const { wellData, loading, error, lastUpdated, stats } = useUSGSData({ sites: region?.wellSites || [] })
+  const configuredWellSites = useMemo(() => region?.wellSites ?? EMPTY_ARR, [region?.wellSites])
+  const { wellData, loading, error, lastUpdated, stats, sites: wellSitesLive } = useUSGSData({
+    sites: configuredWellSites,
+    state: region?.state,
+  })
 
   const [scenario, setScenario] = useState('current');
   const [coolingTooltip, setCoolingTooltip] = useState(null)
@@ -523,6 +536,11 @@ export default function AquiferMonitor() {
   const waterSectors = useMemo(() => region?.waterSectors ?? EMPTY_ARR, [region?.waterSectors])
   const pollutionFactors = useMemo(() => region?.pollutionFactors ?? EMPTY_ARR, [region?.pollutionFactors])
   const populationSeries = useMemo(() => region?.population ?? EMPTY_ARR, [region?.population])
+
+  const mapWellSites = wellSitesLive?.length ? wellSitesLive : configuredWellSites
+  const derivedCenter = useMemo(() => {
+    return averageCenterFromSites(mapWellSites) || region?.center
+  }, [mapWellSites, region?.center])
 
   const coolingBreakdown = useMemo(() => {
     const norm = (s) => String(s || '').toLowerCase()
@@ -694,10 +712,13 @@ export default function AquiferMonitor() {
               attribution: '© OpenStreetMap contributors'
             }
           },
-          layers: [{
-            id: 'osm-tiles', type: 'raster', source: 'osm',
-            paint: { 'raster-brightness-min': 0, 'raster-brightness-max': 0.3, 'raster-saturation': -0.8, 'raster-opacity': 0.7 }
-          }]
+          layers: [
+            { id: 'bg', type: 'background', paint: { 'background-color': '#080B0F' } },
+            {
+              id: 'osm-tiles', type: 'raster', source: 'osm',
+              paint: { 'raster-brightness-min': 0, 'raster-brightness-max': 0.3, 'raster-saturation': -0.8, 'raster-opacity': 0.7 }
+            }
+          ]
         },
         center: REGIONS.virginia?.center || [-77.5, 37.8],
         zoom: REGIONS.virginia?.zoom ?? 7,
@@ -775,7 +796,9 @@ export default function AquiferMonitor() {
     const map = mapInstanceRef.current
     if (!mapReady || !map || !map._layersReady || !region) return
 
-    map.flyTo({ center: region.center, zoom: region.zoom, essential: true })
+    const nextCenter = derivedCenter || region.center
+    const nextZoom = mapWellSites.length ? Math.max(region.zoom || 4, 5) : (region.zoom || 4)
+    map.flyTo({ center: nextCenter, zoom: nextZoom, essential: true })
 
     const setSourceData = (id, data) => {
       const src = map.getSource(id)
@@ -784,14 +807,14 @@ export default function AquiferMonitor() {
 
     setSourceData('depletion-zones', depletionZonesToGeoJSON(region.depletionZones || []))
     setSourceData('recharge', rechargeZonesToGeoJSON(region.rechargeZones || []))
-    setSourceData('wells', wellSitesToGeoJSON(region.wellSites || []))
+    setSourceData('wells', wellSitesToGeoJSON(mapWellSites || []))
     setSourceData('existing-dcs', dcsToGeoJSON(region.existingDCs || []))
     setSourceData('expansions', expansionsToGeoJSON(expansions))
 
     if (map.getSource('wells-live')) {
       map.getSource('wells-live').setData({ type: 'FeatureCollection', features: [] })
     }
-  }, [mapReady, region, expansions, region?.center, region?.depletionZones, region?.existingDCs, region?.rechargeZones, region?.wellSites, region?.zoom])
+  }, [mapReady, region, expansions, derivedCenter, mapWellSites, region?.center, region?.depletionZones, region?.existingDCs, region?.rechargeZones, region?.zoom])
 
   // ── TOGGLE MAP LAYERS ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -1101,7 +1124,7 @@ For more information:
             </div>
             <div className="region-select-wrap">
               <select className="region-select" value={activeRegion} onChange={(e) => selectRegion(e.target.value)}>
-                {Object.values(REGIONS).map((r) => (
+                {Object.values(REGIONS).toSorted((a, b) => (a.name || '').localeCompare(b.name || '')).map((r) => (
                   <option key={r.id} value={r.id}>{r.shortName || r.name}</option>
                 ))}
               </select>
