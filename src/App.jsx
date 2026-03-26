@@ -4,8 +4,9 @@
 // Potomac Aquifer / Northern Virginia Water Depletion Model
 // Date: March 26, 2026
 // ─────────────────────────────────────────────────────────────────────────────
-
+import { REGIONS } from './data/regions'
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useUSGSData } from "./hooks/useUSGS";
 
 // ─── STYLES ────────────────────────────────────────────────────────────────────
 const css = `
@@ -79,9 +80,33 @@ const css = `
     padding: 4px 10px; border-radius: 3px;
     border: 1px solid var(--border);
   }
+  .region-select {
+    appearance: none;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 6px 28px 6px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    outline: none;
+  }
+  .region-select:focus { border-color: var(--blue); }
+  .region-select-wrap { position: relative; }
+  .region-select-wrap::after {
+    content: '▾';
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted2);
+    pointer-events: none;
+    font-size: 10px;
+  }
 
   /* BODY GRID */
-  .body { display: grid; grid-template-columns: 320px 1fr 300px; overflow: hidden; }
+  .body { display: grid; grid-template-columns: 320px 1fr 300px; overflow: hidden; min-height: 0; }
 
   /* LEFT PANEL */
   .left-panel {
@@ -187,7 +212,7 @@ const css = `
   .note-box strong { color: var(--yellow); font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.08em; }
 
   /* MAP CENTER */
-  .map-center { position: relative; display: flex; flex-direction: column; }
+  .map-center { position: relative; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
   .map-tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--surface); padding: 0 16px; }
   .mtab {
     padding: 12px 16px; font-family: var(--font-mono); font-size: 9px;
@@ -426,43 +451,115 @@ const VA_POPULATION = [
   { year: 2050, pop: 10.8 }, { year: 2060, pop: 11.4 },
 ];
 
-// USGS monitoring wells
-const USGS_WELLS = [
-  { lat: 37.243, lng: -76.561, name: 'USGS Well 55H1 — New Kent Co.', level: '-180ft from baseline', trend: 'Declining ↓' },
-  { lat: 36.895, lng: -76.300, name: 'Suffolk Extensometer', level: 'Subsidence 6mm/yr', trend: 'Compacting ↓' },
-  { lat: 36.675, lng: -76.930, name: 'Franklin Extensometer', level: 'Active monitoring', trend: 'Declining ↓' },
-  { lat: 37.932, lng: -76.486, name: 'West Point Extensometer (2024)', level: '1,400ft depth', trend: 'Baseline est.' },
-  { lat: 37.531, lng: -76.330, name: 'Coastal Plain Monitor', level: '-120ft from baseline', trend: 'Declining ↓' },
-];
+const DATA_SOURCES = [
+  { name: 'USGS NWIS Instantaneous Values (GW)', type: 'type-m', typeLabel: 'MEASUREMENT', desc: 'Real-time well readings via USGS NWIS (depth to water). Pulled through a local proxy to avoid CORS.' },
+  { name: 'USGS Groundwater Studies', type: 'type-e', typeLabel: 'EVIDENCE', desc: 'Regional hydrogeology, recharge dynamics, subsidence and saltwater intrusion studies.' },
+  { name: 'Ceres / WRI / Regional Water Plans', type: 'type-e', typeLabel: 'EVIDENCE', desc: 'Context for water stress, growth projections, and reporting gaps.' },
+  { name: 'Public Announcements / Permits', type: 'type-p', typeLabel: 'PROJECTS', desc: 'Expansion timelines, MW buildout and stated cooling approaches from public filings and company statements.' },
+]
 
-// Data centers (existing)
-const EXISTING_DCS = [
-  { lat: 39.083, lng: -77.554, name: 'Ashburn Mega-Cluster', size: 50, consumption: '~900M gal/yr est.' },
-  { lat: 38.953, lng: -77.359, name: 'Reston Corridor', size: 20, consumption: '~200M gal/yr est.' },
-  { lat: 38.805, lng: -77.047, name: 'Arlington/Tysons', size: 14, consumption: '~150M gal/yr est.' },
-  { lat: 38.685, lng: -77.324, name: 'Prince William Zone', size: 16, consumption: '~140M gal/yr est.' },
-  { lat: 39.141, lng: -77.714, name: 'Leesburg Expansion', size: 10, consumption: '~80M gal/yr est.' },
-];
+function circlePolygon([lat0, lng0], radiusMeters, points = 64) {
+  const coords = []
+  const R = 6371000
+  const lat = (lat0 * Math.PI) / 180
+  for (let j = 0; j < points; j++) {
+    const angle = (j / points) * 2 * Math.PI
+    const dlat = (radiusMeters / R) * Math.cos(angle)
+    const dlng = ((radiusMeters / R) * Math.sin(angle)) / Math.cos(lat)
+    coords.push([lng0 + (dlng * 180) / Math.PI, lat0 + (dlat * 180) / Math.PI])
+  }
+  coords.push(coords[0])
+  return coords
+}
 
-// Aquifer depletion zones
-const DEPLETION_ZONES = [
-  { center: [36.95, -76.33], radius: 38000, color: '#E63946', name: 'Hampton Roads Critical Zone', severity: 'Critical' },
-  { center: [39.04, -77.49], radius: 28000, color: '#F4A261', name: 'N. Virginia High Stress Zone', severity: 'High' },
-  { center: [37.53, -76.83], radius: 22000, color: '#E9C46A', name: 'Middle Peninsula Moderate Zone', severity: 'Moderate' },
-];
+function depletionZonesToGeoJSON(zones = []) {
+  return {
+    type: 'FeatureCollection',
+    features: (zones || []).map((z) => ({
+      type: 'Feature',
+      geometry: { type: 'Polygon', coordinates: [circlePolygon(z.center, z.radius)] },
+      properties: { name: z.name, severity: z.severity, color: z.color },
+    })),
+  }
+}
+
+function rechargeZonesToGeoJSON(zones = []) {
+  return {
+    type: 'FeatureCollection',
+    features: (zones || []).map((z) => ({
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: z.coords },
+      properties: { name: z.name, note: z.note },
+    })),
+  }
+}
+
+function wellSitesToGeoJSON(wells = []) {
+  return {
+    type: 'FeatureCollection',
+    features: (wells || []).map((w) => ({
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [w.lng, w.lat] },
+      properties: { id: w.id, name: w.name, priority: w.priority },
+    })),
+  }
+}
+
+function dcsToGeoJSON(dcs = []) {
+  return {
+    type: 'FeatureCollection',
+    features: (dcs || []).map((dc) => ({
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [dc.lng, dc.lat] },
+      properties: { name: dc.name, consumption: dc.consumption, size: dc.size },
+    })),
+  }
+}
+
+function expansionsToGeoJSON(expansions = []) {
+  return {
+    type: 'FeatureCollection',
+    features: (expansions || []).map((e) => ({
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [e.lng, e.lat] },
+      properties: { name: e.name, year: e.year, mw: e.mw, investment: e.investment, cooling: e.cooling, waterImpact: e.waterImpact, desc: e.desc, color: e.color },
+    })),
+  }
+}
+
+const GROWTH_AI_MULT = 28.0 / 15.8
+const GROWTH_MANAGED_MULT = 4.0 / 15.8
+function computeScenarioGrowths(baseGrowth) {
+  const base = baseGrowth ?? 0
+  return {
+    current: base,
+    ai: +(base * GROWTH_AI_MULT).toFixed(1),
+    managed: +(base * GROWTH_MANAGED_MULT).toFixed(1),
+  }
+}
 
 // ─── MAIN COMPONENT ────────────────────────────────────────────────────────────
 export default function AquiferMonitor() {
+  const [activeRegion, setActiveRegion] = useState('virginia')
+  const region = REGIONS[activeRegion]
+  const { wellData, loading, error, lastUpdated } = useUSGSData({ sites: region?.wellSites || [] })
+
   const [scenario, setScenario] = useState('current');
-  const [params, setParams] = useState({
-    consumption: 2.0,   // B gal/yr (2023 measured ~1.85B + est. unreported)
-    growth: 15.8,       // % annual CAGR
-    capacity: 850,      // B gal remaining usable
-    recharge: 0.2,      // B gal/yr
-    dcPct: 22,          // % of total regional water
-    popGrowth: 1.2,     // % annual population growth
-    pollutionFactor: 15, // % effective capacity reduction from contamination
-  });
+  const scenarioGrowths = useMemo(() => {
+    return computeScenarioGrowths(region?.model?.growth ?? 0)
+  }, [region?.model?.growth])
+
+  const [params, setParams] = useState(() => ({
+    ...(REGIONS.virginia?.model || {
+      consumption: 2.0,
+      growth: 15.8,
+      capacity: 850,
+      recharge: 0.2,
+      dcPct: 22,
+      popGrowth: 1.2,
+      pollutionFactor: 15,
+    }),
+  }));
   const [activeView, setActiveView] = useState('map');
   const [layers, setLayers] = useState({
     dataCenters: true,
@@ -472,10 +569,23 @@ export default function AquiferMonitor() {
     recharge: true,
   });
   const [customPoints, setCustomPoints] = useState([]);
+  const [mapReady, setMapReady] = useState(false)
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const depletionCanvasRef = useRef(null);
   const populationCanvasRef = useRef(null);
+
+  const expansions = region?.expansions?.length ? region.expansions : EXPANSIONS
+  const waterSources = region?.waterSources?.length ? region.waterSources : WATER_SOURCES
+
+  const selectRegion = useCallback((regionId) => {
+    const nextRegion = REGIONS[regionId]
+    if (!nextRegion?.model) return
+    const nextGrowths = computeScenarioGrowths(nextRegion.model.growth)
+
+    setActiveRegion(regionId)
+    setParams({ ...nextRegion.model, growth: nextGrowths[scenario] ?? nextRegion.model.growth })
+  }, [scenario])
 
   // ── MODEL CALCULATION ────────────────────────────────────────────────────────
   const model = useMemo(() => {
@@ -540,8 +650,8 @@ export default function AquiferMonitor() {
   // ── SET SCENARIO ─────────────────────────────────────────────────────────────
   const applyScenario = useCallback((id) => {
     setScenario(id);
-    setParams(p => ({ ...p, growth: SCENARIOS[id].growth }));
-  }, []);
+    setParams(p => ({ ...p, growth: scenarioGrowths[id] ?? p.growth }));
+  }, [scenarioGrowths]);
 
   // ── UPDATE PARAM ─────────────────────────────────────────────────────────────
   const setParam = useCallback((key, value) => {
@@ -584,62 +694,44 @@ export default function AquiferMonitor() {
             paint: { 'raster-brightness-min': 0, 'raster-brightness-max': 0.3, 'raster-saturation': -0.8, 'raster-opacity': 0.7 }
           }]
         },
-        center: [-77.5, 37.8],
-        zoom: 7,
+        center: REGIONS.virginia?.center || [-77.5, 37.8],
+        zoom: REGIONS.virginia?.zoom ?? 7,
         attributionControl: false,
       });
 
       mapInstanceRef.current = map;
 
       map.on('load', () => {
-        // Add depletion zones as circles
-        DEPLETION_ZONES.forEach((zone, i) => {
-          // Create a GeoJSON circle approximation
-          const points = 64;
-          const coords = [];
-          const R = 6371000;
-          const lat = zone.center[0] * Math.PI / 180;
-          for (let j = 0; j < points; j++) {
-            const angle = (j / points) * 2 * Math.PI;
-            const dlat = (zone.radius / R) * Math.cos(angle);
-            const dlng = (zone.radius / R) * Math.sin(angle) / Math.cos(lat);
-            coords.push([(zone.center[1] + dlng * 180 / Math.PI), (zone.center[0] + dlat * 180 / Math.PI)]);
-          }
-          coords.push(coords[0]);
-          map.addSource(`depletion-${i}`, { type: 'geojson', data: { type: 'Feature', geometry: { type: 'Polygon', coordinates: [coords] } } });
-          map.addLayer({ id: `depletion-fill-${i}`, type: 'fill', source: `depletion-${i}`, paint: { 'fill-color': zone.color, 'fill-opacity': 0.06 } });
-          map.addLayer({ id: `depletion-line-${i}`, type: 'line', source: `depletion-${i}`, paint: { 'line-color': zone.color, 'line-width': 1.5, 'line-dasharray': [3, 3] } });
-        });
+        // Depletion zones
+        map.addSource('depletion-zones', { type: 'geojson', data: depletionZonesToGeoJSON(REGIONS.virginia?.depletionZones || []) })
+        map.addLayer({ id: 'depletion-fill', type: 'fill', source: 'depletion-zones', paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 0.06 } })
+        map.addLayer({ id: 'depletion-line', type: 'line', source: 'depletion-zones', paint: { 'line-color': ['get', 'color'], 'line-width': 1.5, 'line-dasharray': [3, 3] } })
 
         // Recharge zones
-        const rechargePoints = [
-          { coords: [-77.754, 38.301], name: 'Fredericksburg Fall Line Recharge Zone', note: 'Primary surface recharge. Water entering here may take 1M+ years to reach coast.' },
-          { coords: [-78.123, 38.504], name: 'Blue Ridge Piedmont Recharge', note: 'Secondary recharge, shallow aquifer layers only.' },
-        ];
         map.addSource('recharge', {
           type: 'geojson',
-          data: { type: 'FeatureCollection', features: rechargePoints.map(p => ({ type: 'Feature', geometry: { type: 'Point', coordinates: p.coords }, properties: { name: p.name, note: p.note } })) }
+          data: rechargeZonesToGeoJSON(REGIONS.virginia?.rechargeZones || [])
         });
         map.addLayer({ id: 'recharge-layer', type: 'circle', source: 'recharge', paint: { 'circle-radius': 14, 'circle-color': '#2EC4B6', 'circle-opacity': 0.2, 'circle-stroke-width': 2, 'circle-stroke-color': '#2EC4B6' } });
 
         // USGS wells
         map.addSource('wells', {
           type: 'geojson',
-          data: { type: 'FeatureCollection', features: USGS_WELLS.map(w => ({ type: 'Feature', geometry: { type: 'Point', coordinates: [w.lng, w.lat] }, properties: { name: w.name, level: w.level, trend: w.trend } })) }
+          data: wellSitesToGeoJSON(REGIONS.virginia?.wellSites || [])
         });
         map.addLayer({ id: 'wells-layer', type: 'circle', source: 'wells', paint: { 'circle-radius': 7, 'circle-color': '#E9C46A', 'circle-opacity': 0.85, 'circle-stroke-width': 1.5, 'circle-stroke-color': '#b8962a' } });
 
         // Existing data centers
         map.addSource('existing-dcs', {
           type: 'geojson',
-          data: { type: 'FeatureCollection', features: EXISTING_DCS.map(dc => ({ type: 'Feature', geometry: { type: 'Point', coordinates: [dc.lng, dc.lat] }, properties: { name: dc.name, consumption: dc.consumption, size: dc.size } })) }
+          data: dcsToGeoJSON(REGIONS.virginia?.existingDCs || [])
         });
         map.addLayer({ id: 'dcs-layer', type: 'circle', source: 'existing-dcs', paint: { 'circle-radius': ['interpolate', ['linear'], ['get', 'size'], 10, 8, 50, 20], 'circle-color': '#E63946', 'circle-opacity': 0.25, 'circle-stroke-width': 2, 'circle-stroke-color': '#E63946' } });
 
         // Planned expansions
         map.addSource('expansions', {
           type: 'geojson',
-          data: { type: 'FeatureCollection', features: EXPANSIONS.map(e => ({ type: 'Feature', geometry: { type: 'Point', coordinates: [e.lng, e.lat] }, properties: { name: e.name, year: e.year, mw: e.mw, investment: e.investment, cooling: e.cooling, waterImpact: e.waterImpact, desc: e.desc, color: e.color } })) }
+          data: expansionsToGeoJSON(REGIONS.virginia?.expansions || [])
         });
         map.addLayer({ id: 'expansions-layer', type: 'circle', source: 'expansions', paint: { 'circle-radius': 11, 'circle-color': ['get', 'color'], 'circle-opacity': 0.3, 'circle-stroke-width': 2, 'circle-stroke-color': ['get', 'color'], 'circle-stroke-opacity': 0.9 } });
 
@@ -658,16 +750,43 @@ export default function AquiferMonitor() {
 
         addPopup('dcs-layer', p => `<div style="color:#E63946;font-weight:700;margin-bottom:6px;">🏭 ${p.name}</div><div style="color:#8A9BB0;font-size:9px;">Est. Water Use: ${p.consumption}</div><div style="color:#E63946;font-size:8px;margin-top:4px;font-style:italic;">⚠ No mandatory reporting</div>`);
         addPopup('expansions-layer', p => `<div style="color:${p.color};font-weight:700;margin-bottom:6px;">📋 ${p.name}</div><div style="color:#8A9BB0;font-size:9px;">Timeline: ${p.year}</div><div style="color:#8A9BB0;font-size:9px;">Capacity: ${p.mw} MW | ${p.investment}</div><div style="color:#8A9BB0;font-size:9px;">Cooling: ${p.cooling}</div><div style="color:#8A9BB0;font-size:9px;margin-top:4px;">Water Impact: <span style="color:${p.waterImpact.includes('Low') ? '#2EC4B6' : '#E63946'}">${p.waterImpact}</span></div><div style="color:#5A7080;font-size:8px;margin-top:5px;line-height:1.5;">${p.desc}</div>`);
-        addPopup('wells-layer', p => `<div style="color:#E9C46A;font-weight:700;margin-bottom:6px;">📊 ${p.name}</div><div style="color:#8A9BB0;font-size:9px;">Level: ${p.level}</div><div style="color:#8A9BB0;font-size:9px;">Trend: <span style="color:#E63946">${p.trend}</span></div>`);
+        addPopup('wells-layer', p => `<div style="color:#E9C46A;font-weight:700;margin-bottom:6px;">📊 ${p.name}</div><div style="color:#8A9BB0;font-size:9px;">Site: ${p.id}</div><div style="color:#8A9BB0;font-size:9px;">Priority: <span style="color:${p.priority === 'critical' ? '#E63946' : p.priority === 'high' ? '#F4A261' : '#8A9BB0'}">${p.priority}</span></div><div style="color:#2EC4B6;font-size:8px;margin-top:4px;">● Click nearby live points when available</div>`);
         addPopup('recharge-layer', p => `<div style="color:#2EC4B6;font-weight:700;margin-bottom:6px;">♻ ${p.name}</div><div style="color:#8A9BB0;font-size:9px;line-height:1.5;">${p.note}</div>`);
 
         mapInstanceRef.current._layersReady = true;
+        setMapReady(true)
       });
     };
     document.head.appendChild(script);
 
-    return () => { if (mapInstanceRef.current) { mapInstanceRef.current.remove(); mapInstanceRef.current = null; } };
+    return () => {
+      setMapReady(false)
+      if (mapInstanceRef.current) { mapInstanceRef.current.remove(); mapInstanceRef.current = null; }
+    };
   }, []);
+
+  // ── REGION → MAP DATA ────────────────────────────────────────────────────────
+  useEffect(() => {
+    const map = mapInstanceRef.current
+    if (!mapReady || !map || !map._layersReady || !region) return
+
+    map.flyTo({ center: region.center, zoom: region.zoom, essential: true })
+
+    const setSourceData = (id, data) => {
+      const src = map.getSource(id)
+      if (src && typeof src.setData === 'function') src.setData(data)
+    }
+
+    setSourceData('depletion-zones', depletionZonesToGeoJSON(region.depletionZones || []))
+    setSourceData('recharge', rechargeZonesToGeoJSON(region.rechargeZones || []))
+    setSourceData('wells', wellSitesToGeoJSON(region.wellSites || []))
+    setSourceData('existing-dcs', dcsToGeoJSON(region.existingDCs || []))
+    setSourceData('expansions', expansionsToGeoJSON(expansions))
+
+    if (map.getSource('wells-live')) {
+      map.getSource('wells-live').setData({ type: 'FeatureCollection', features: [] })
+    }
+  }, [mapReady, region, expansions, region?.center, region?.depletionZones, region?.existingDCs, region?.rechargeZones, region?.wellSites, region?.zoom])
 
   // ── TOGGLE MAP LAYERS ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -678,13 +797,72 @@ export default function AquiferMonitor() {
       map.setLayoutProperty('dcs-layer', 'visibility', vis(layers.dataCenters));
       map.setLayoutProperty('expansions-layer', 'visibility', vis(layers.expansions));
       map.setLayoutProperty('wells-layer', 'visibility', vis(layers.wells));
+      if (map.getLayer('wells-live-layer')) map.setLayoutProperty('wells-live-layer', 'visibility', vis(layers.wells));
       map.setLayoutProperty('recharge-layer', 'visibility', vis(layers.recharge));
-      [0,1,2].forEach(i => {
-        map.setLayoutProperty(`depletion-fill-${i}`, 'visibility', vis(layers.depletion));
-        map.setLayoutProperty(`depletion-line-${i}`, 'visibility', vis(layers.depletion));
-      });
+      map.setLayoutProperty('depletion-fill', 'visibility', vis(layers.depletion));
+      map.setLayoutProperty('depletion-line', 'visibility', vis(layers.depletion));
     } catch { /* layer not ready yet */ }
   }, [layers]);
+
+  // ── LIVE WELL DATA → MAP ─────────────────────────────────────────────────────
+useEffect(() => {
+  const map = mapInstanceRef.current
+  if (!map || !map._layersReady || Object.keys(wellData).length === 0) return
+
+  const features = Object.values(wellData)
+    .filter(w => w.isValid)
+    .map(w => ({
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [w.lng, w.lat] },
+      properties: {
+        name: w.name,
+        depth: w.depthToWater,
+        timestamp: w.timestamp,
+        priority: w.priority,
+        color: w.depthToWater > 200 ? '#E63946'
+             : w.depthToWater > 150 ? '#F4A261'
+             : w.depthToWater > 100 ? '#E9C46A' : '#2EC4B6'
+      }
+    }))
+
+  const geojson = { type: 'FeatureCollection', features }
+
+  if (map.getSource('wells-live')) {
+    map.getSource('wells-live').setData(geojson)
+  } else {
+    map.addSource('wells-live', { type: 'geojson', data: geojson })
+    map.addLayer({
+      id: 'wells-live-layer',
+      type: 'circle',
+      source: 'wells-live',
+      paint: {
+        'circle-radius': 9,
+        'circle-color': ['get', 'color'],
+        'circle-opacity': 0.9,
+        'circle-stroke-width': 2,
+        'circle-stroke-color': ['get', 'color']
+      }
+    })
+
+    // Popup for live wells
+    const maplibregl = window.maplibregl
+    map.on('click', 'wells-live-layer', (e) => {
+      const p = e.features[0].properties
+      new maplibregl.Popup({ closeButton: true, maxWidth: '260px' })
+        .setLngLat(e.lngLat)
+        .setHTML(`
+          <div style="color:#E9C46A;font-weight:700;margin-bottom:6px;">📡 ${p.name}</div>
+          <div style="color:#8A9BB0;font-size:9px;">Depth to water: <span style="color:#E63946">${p.depth} ft</span></div>
+          <div style="color:#8A9BB0;font-size:9px;">Priority: ${p.priority}</div>
+          <div style="color:#5A7080;font-size:8px;margin-top:4px;">Last reading: ${new Date(p.timestamp).toLocaleString()}</div>
+          <div style="color:#2EC4B6;font-size:8px;margin-top:2px;">● LIVE USGS DATA</div>
+        `)
+        .addTo(map)
+    })
+    map.on('mouseenter', 'wells-live-layer', () => { map.getCanvas().style.cursor = 'pointer' })
+    map.on('mouseleave', 'wells-live-layer', () => { map.getCanvas().style.cursor = '' })
+  }
+}, [wellData])
 
   // ── CHARTS ───────────────────────────────────────────────────────────────────
   const drawCharts = useCallback(() => {
@@ -826,8 +1004,10 @@ export default function AquiferMonitor() {
 
   // ── EXPORT ───────────────────────────────────────────────────────────────────
   const exportReport = useCallback(() => {
-    const blob = new Blob([`POTOMAC AQUIFER CRISIS MODEL REPORT
-Generated: March 26, 2026
+    const blob = new Blob([`AQUIFER CRISIS MONITOR — MODEL REPORT
+Generated: ${new Date().toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
+Region: ${region?.name || 'Unknown'}
+Aquifer/System: ${region?.aquifer || 'N/A'}
 Model: Aquifer Crisis Monitor v2.0
 
 CRISIS ESTIMATE
@@ -853,7 +1033,7 @@ ${WATER_SECTORS.map(s => `${s.name}: ${s.mgd} MGD (${s.pct}%)`).join('\n')}
 
 PLANNED EXPANSION PROJECTS (2026-2035)
 ═══════════════════════════════════════
-${EXPANSIONS.map(e => `${e.name}\n  Timeline: ${e.year} | ${e.mw}MW | ${e.investment}\n  Water Impact: ${e.waterImpact}\n  Cooling: ${e.cooling}`).join('\n\n')}
+${expansions.map(e => `${e.name}\n  Timeline: ${e.year} | ${e.mw}MW | ${e.investment}\n  Water Impact: ${e.waterImpact}\n  Cooling: ${e.cooling}`).join('\n\n')}
 
 DATA SOURCES
 ════════════
@@ -880,7 +1060,7 @@ For more information:
 `], { type: 'text/plain' });
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
     a.download = `aquifer-crisis-report-${new Date().toISOString().split('T')[0]}.txt`; a.click();
-  }, [model, params, scenario, yearsLeft]);
+  }, [model, params, scenario, yearsLeft, region, expansions]);
 
   // ── RENDER ───────────────────────────────────────────────────────────────────
   return (
@@ -897,10 +1077,24 @@ For more information:
               <span className="badge badge-green">● LIVE MODEL</span>
               <span className="badge badge-blue">MapLibre GL JS</span>
             </div>
+            <div className="region-select-wrap">
+              <select className="region-select" value={activeRegion} onChange={(e) => selectRegion(e.target.value)}>
+                {Object.values(REGIONS).map((r) => (
+                  <option key={r.id} value={r.id}>{r.shortName || r.name}</option>
+                ))}
+              </select>
+            </div>
           </div>
           <div className="header-right">
-            <span className="date-chip">March 26, 2026</span>
-            <span className="date-chip">Potomac Aquifer · N. Virginia</span>
+            <span className="date-chip">{new Date().toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+            <span className="date-chip">{region?.aquifer || 'Aquifer'} · {region?.shortName || region?.name}</span>
+{lastUpdated && (
+  <span className="date-chip" style={{ color: 'var(--green)' }}>
+    ● USGS updated {lastUpdated.toLocaleTimeString()}
+  </span>
+)}
+{loading && <span className="date-chip" style={{ color: 'var(--muted)' }}>⟳ Fetching USGS...</span>}
+{error && <span className="date-chip" style={{ color: 'var(--red)' }}>⚠ USGS error — using static data</span>}
           </div>
         </header>
 
@@ -1062,8 +1256,8 @@ For more information:
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                   <div className="chart-card">
-                    <div className="chart-card-title">Water Source Types — N. Virginia</div>
-                    {WATER_SOURCES.map(s => (
+                    <div className="chart-card-title">Water Source Types — {region?.shortName || region?.name}</div>
+                    {waterSources.map(s => (
                       <div key={s.name} className="source-type-row">
                         <div className="src-type-label"><div className="src-type-dot" style={{ background: s.color }} />{s.name}</div>
                         <div className="src-type-pct">{s.pct}%</div>
@@ -1072,7 +1266,7 @@ For more information:
                   </div>
                   <div className="chart-card">
                     <div className="chart-card-title">Expansion MW Pipeline (2026–2035)</div>
-                    {EXPANSIONS.sort((a, b) => b.mw - a.mw).map(e => (
+                    {[...expansions].sort((a, b) => b.mw - a.mw).map(e => (
                       <div key={e.name} className="sector-bar-row">
                         <div className="sector-bar-header">
                           <span style={{ fontSize: 9, color: 'var(--muted2)' }}>{e.name.split('—')[0].trim().substring(0, 24)}</span>
@@ -1112,19 +1306,7 @@ For more information:
               <div className="sources-pane">
                 <div className="src-head">Data Sources & Methodology</div>
                 <div className="src-sub">All sources are public. All estimates are transparent, labeled, and adjustable.</div>
-                {[
-                  { name: 'Virginia JLARC Data Center Study (2024)', type: 'type-m', typeLabel: 'Measured', desc: 'Comprehensive legislative study. 74,000 jobs, $9.1B GDP, confirms water use is "on the rise." Confirms no mandatory reporting exists.' },
-                  { name: 'Financial Times FOIA Investigation (Aug 2024)', type: 'type-m', typeLabel: 'Measured', desc: 'FOIA requests to 6 regional water authorities confirmed 1.85B+ gal/yr in 2023, up from 1.13B in 2019 (64% increase). Partial data only — several utilities declined to provide information.' },
-                  { name: 'USGS NWIS Virginia Groundwater Data', type: 'type-m', typeLabel: 'Measured', desc: 'National Water Information System real-time and historical groundwater level data. Source of 200ft decline figure, 6mm/yr subsidence rate. waterdata.usgs.gov/va/nwis/gw' },
-                  { name: 'USGS Potomac Aquifer Scientific Report (2013-5116)', type: 'type-m', typeLabel: 'Measured', desc: 'Geological survey of Potomac Aquifer extent and conditions. Water trapped since Cretaceous Period. 1" of 43" annual rainfall reaches deep layers.' },
-                  { name: 'Virginia DEQ Annual Water Resources Report (Oct 2024)', type: 'type-m', typeLabel: 'Measured', desc: 'Reported water withdrawals for 2023. Sector breakdown by industry. Regulatory water withdrawal reporting thresholds.' },
-                  { name: 'Broadband Breakfast / Dateline Ashburn (Sept 2025)', type: 'type-m', typeLabel: 'Measured', desc: 'Data center water consumption in Northern Virginia reached ~2B gal in 2023, 63% increase from 2019. Loudoun Water 736M gal reclaimed water in 2024.' },
-                  { name: 'Planned Expansion Projects (2025–2026 announcements)', type: 'type-m', typeLabel: 'Announced', desc: 'CleanArc $3B (Jan 2026), Google $9B (Feb 2026), Vantage $2B (Nov 2025), Stack Berry Hill $73.5B (Mar 2026), AVAIO Appomattox (Mar 2026). Sources: Construction Dive, Virginia Business, WDBJ7.' },
-                  { name: 'Aquifer Remaining Capacity (850B gal default)', type: 'type-e', typeLabel: 'Estimated', desc: 'No definitive public figure exists. Derived from USGS geological survey of aquifer thickness, extent, and porosity. This is the model\'s highest uncertainty variable. The absence of a better number is itself the problem — no funding for comprehensive aquifer modeling despite hosting 70% of global internet traffic.' },
-                  { name: 'Data Center % of Water Use (22% default)', type: 'type-e', typeLabel: 'Estimated', desc: 'No mandatory reporting. Derived from Loudoun Water reclaimed delivery (736M gal) + partial utility FOIA data + FT investigation. Actual share likely higher.' },
-                  { name: 'AI Growth Rate (28% CAGR — AI Surge scenario)', type: 'type-p', typeLabel: 'Projected', desc: 'Based on announced MW buildout pipeline, Nvidia GPU deployment curves, and compound heat load of AI training clusters requiring 40-100kW/rack.' },
-                  { name: 'Pollution Factors', type: 'type-e', typeLabel: 'Estimated', desc: 'PFAS widespread in VA groundwater (VA DEQ). Saltwater intrusion affecting Hampton Roads. Nitrate contamination from Chesapeake Bay watershed agriculture. Severity scores are relative, not absolute measurements.' },
-                ].map((s, i) => (
+                {DATA_SOURCES.map((s, i) => (
                   <div key={i} className="src-card">
                     <div className="src-name">{s.name}</div>
                     <span className={`src-type ${s.type}`}>{s.typeLabel}</span>
@@ -1175,14 +1357,14 @@ For more information:
 
             <div className="panel-section">
               <div className="section-header">Water Source Types</div>
-              {WATER_SOURCES.map(s => (
+              {waterSources.map(s => (
                 <div key={s.name} style={{ marginBottom: 10 }}>
                   <div className="source-type-row">
                     <div className="src-type-label"><div className="src-type-dot" style={{ background: s.color }} />{s.name}</div>
                     <div className="src-type-pct">{s.pct}%</div>
                   </div>
                   <div style={{ fontSize: 9, color: 'var(--muted)', lineHeight: 1.4, marginTop: 2 }}>
-                    Risk: <span style={{ color: s.risk === 'Critical' ? 'var(--red)' : s.risk === 'High' ? 'var(--orange)' : s.risk === 'Moderate' ? 'var(--yellow)' : 'var(--green)' }}>{s.risk}</span> — {s.note}
+                    Risk: <span style={{ color: s.risk === 'Critical' ? 'var(--red)' : s.risk === 'High' ? 'var(--orange)' : s.risk === 'Moderate' ? 'var(--yellow)' : 'var(--green)' }}>{s.risk}</span>{s.note ? ` — ${s.note}` : ''}
                   </div>
                 </div>
               ))}
@@ -1190,7 +1372,7 @@ For more information:
 
             <div className="panel-section">
               <div className="section-header">Expansion Projects Pipeline</div>
-              {EXPANSIONS.map((e, i) => (
+              {region.expansions.map((e, i) => (
                 <div key={i} className="expansion-item">
                   <div className="exp-name" style={{ color: e.color }}>{e.name.split('—')[0].trim()}</div>
                   <div style={{ fontSize: 9, color: 'var(--muted)', marginBottom: 4 }}>{e.name.includes('—') ? e.name.split('—')[1]?.trim() : ''}</div>
