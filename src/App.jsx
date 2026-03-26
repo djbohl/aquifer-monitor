@@ -336,6 +336,43 @@ const css = `
   .pm-val { font-family: var(--font-mono); font-size: 10px; }
   .pm-bar-track { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
   .pm-bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s; }
+
+  /* SIMPLE HOVER TOOLTIP */
+  .hover-tooltip {
+    position: fixed;
+    z-index: 10000;
+    max-width: 320px;
+    background: rgba(14,19,24,0.98);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 10px 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.55);
+    pointer-events: none;
+  }
+  .hover-tooltip-title {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted2);
+    margin-bottom: 6px;
+  }
+  .hover-tooltip-meta {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .hover-tooltip-list {
+    max-height: 180px;
+    overflow: hidden;
+  }
+  .hover-tooltip-item {
+    font-size: 10px;
+    color: var(--muted2);
+    line-height: 1.4;
+    margin-bottom: 4px;
+  }
 `;
 
 // ─── DATA ─────────────────────────────────────────────────────────────────────
@@ -450,6 +487,7 @@ export default function AquiferMonitor() {
   const { wellData, loading, error, lastUpdated, stats } = useUSGSData({ sites: region?.wellSites || [] })
 
   const [scenario, setScenario] = useState('current');
+  const [coolingTooltip, setCoolingTooltip] = useState(null)
   const scenarioGrowths = useMemo(() => {
     return computeScenarioGrowths(region?.model?.growth ?? 0)
   }, [region?.model?.growth])
@@ -485,6 +523,65 @@ export default function AquiferMonitor() {
   const waterSectors = useMemo(() => region?.waterSectors ?? EMPTY_ARR, [region?.waterSectors])
   const pollutionFactors = useMemo(() => region?.pollutionFactors ?? EMPTY_ARR, [region?.pollutionFactors])
   const populationSeries = useMemo(() => region?.population ?? EMPTY_ARR, [region?.population])
+
+  const coolingBreakdown = useMemo(() => {
+    const norm = (s) => String(s || '').toLowerCase()
+    const classify = (cooling) => {
+      const s = norm(cooling)
+      if (!s) return 'Unknown / TBD'
+      if (s.includes('immersion')) return 'Immersion'
+      if (s.includes('closed-loop') || s.includes('closed loop') || s.includes('closedloop')) return 'Closed-loop'
+      if (s.includes('air-cooled') || s.includes('air cooled') || (s.includes('air') && s.includes('cooled'))) return 'Air-cooled'
+      if (s.includes('evapor')) return 'Evaporative'
+      if (s.includes('mixed')) return 'Mixed'
+      if (s.includes('water-free') || s.includes('water free')) return 'Water-free'
+      if (s.includes('unknown') || s.includes('tbd') || s.includes('under review')) return 'Unknown / TBD'
+      return 'Other'
+    }
+
+    const rows = new Map()
+    for (const e of expansions) {
+      const key = classify(e.cooling)
+      const prev = rows.get(key) || { key, projects: 0, mw: 0, projectNames: [] }
+      prev.projects += 1
+      prev.mw += Number(e.mw) || 0
+      if (e?.name) prev.projectNames.push(String(e.name))
+      rows.set(key, prev)
+    }
+
+    const list = Array.from(rows.values()).sort((a, b) => b.mw - a.mw)
+    const totalMw = list.reduce((s, r) => s + r.mw, 0) || 1
+    const color = (k) => (
+      k === 'Closed-loop' ? '#2EC4B6'
+      : k === 'Air-cooled' ? '#2EC4B6'
+      : k === 'Water-free' ? '#2EC4B6'
+      : k === 'Immersion' ? '#2EC4B6'
+      : k === 'Evaporative' ? '#E63946'
+      : k === 'Mixed' ? '#E9C46A'
+      : k === 'Other' ? '#9B5DE5'
+      : '#8A9BB0'
+    )
+
+    return list.map((r) => ({
+      ...r,
+      pct: (r.mw / totalMw) * 100,
+      color: color(r.key),
+    }))
+  }, [expansions])
+
+  const showCoolingTooltip = useCallback((e, row) => {
+    setCoolingTooltip({
+      x: e.clientX,
+      y: e.clientY,
+      key: row.key,
+      mw: row.mw,
+      projects: row.projectNames || [],
+    })
+  }, [])
+  const moveCoolingTooltip = useCallback((e) => {
+    setCoolingTooltip((t) => (t ? { ...t, x: e.clientX, y: e.clientY } : t))
+  }, [])
+  const hideCoolingTooltip = useCallback(() => setCoolingTooltip(null), [])
 
   const selectRegion = useCallback((regionId) => {
     const nextRegion = REGIONS[regionId]
@@ -1244,7 +1341,64 @@ For more information:
                     ))}
                   </div>
                 </div>
+                <div className="chart-card">
+                  <div className="chart-card-title">Cooling Types — Expansion Pipeline</div>
+                  {coolingBreakdown.length === 0 ? (
+                    <div style={{ fontSize: 10, color: 'var(--muted2)', lineHeight: 1.6 }}>No cooling metadata available for this region’s expansion list.</div>
+                  ) : (
+                    coolingBreakdown.map((r) => (
+                      <div key={r.key} className="sector-bar-row">
+                        <div className="sector-bar-header">
+                          <span style={{ fontSize: 10, color: 'var(--text)' }}>{r.key}</span>
+                          <span
+                            onMouseEnter={(e) => showCoolingTooltip(e, r)}
+                            onMouseMove={moveCoolingTooltip}
+                            onMouseLeave={hideCoolingTooltip}
+                            style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: r.color, cursor: 'pointer' }}
+                          >
+                            {r.projects} projects · {r.mw}MW
+                          </span>
+                        </div>
+                        <div className="sector-bar-track">
+                          <div
+                            className="sector-bar-fill"
+                            onMouseEnter={(e) => showCoolingTooltip(e, r)}
+                            onMouseMove={moveCoolingTooltip}
+                            onMouseLeave={hideCoolingTooltip}
+                            style={{ width: `${r.pct}%`, background: r.color, cursor: 'pointer' }}
+                          />
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
+              {coolingTooltip && (
+                <div
+                  className="hover-tooltip"
+                  style={{
+                    left: Math.min(coolingTooltip.x + 14, (typeof window !== 'undefined' ? window.innerWidth : 1200) - 340),
+                    top: Math.min(coolingTooltip.y + 14, (typeof window !== 'undefined' ? window.innerHeight : 800) - 220),
+                  }}
+                >
+                  <div className="hover-tooltip-title">Cooling Type</div>
+                  <div className="hover-tooltip-meta">{coolingTooltip.key} · {coolingTooltip.projects.length} projects · {coolingTooltip.mw}MW</div>
+                  <div className="hover-tooltip-list">
+                    {coolingTooltip.projects.length === 0 ? (
+                      <div className="hover-tooltip-item">No projects listed.</div>
+                    ) : (
+                      <>
+                        {coolingTooltip.projects.slice(0, 10).map((name) => (
+                          <div key={name} className="hover-tooltip-item">• {name}</div>
+                        ))}
+                        {coolingTooltip.projects.length > 10 && (
+                          <div className="hover-tooltip-item">+ {coolingTooltip.projects.length - 10} more…</div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* TIMELINE */}
