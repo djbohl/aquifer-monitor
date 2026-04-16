@@ -1124,7 +1124,7 @@ For more information:
             </div>
             <div className="region-select-wrap">
               <select className="region-select" value={activeRegion} onChange={(e) => selectRegion(e.target.value)}>
-                {Object.values(REGIONS).toSorted((a, b) => (a.name || '').localeCompare(b.name || '')).map((r) => (
+                {Object.values(REGIONS).filter(r => ['virginia', 'texas', 'arizona', 'oregon', 'nevada', 'california'].includes(r.id)).toSorted((a, b) => (a.name || '').localeCompare(b.name || '')).map((r) => (
                   <option key={r.id} value={r.id}>{r.shortName || r.name}</option>
                 ))}
               </select>
