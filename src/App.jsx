@@ -9,6 +9,9 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useUSGSData } from "./hooks/useUSGS";
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import mapWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
+
+maplibregl.setWorkerUrl(mapWorkerUrl);
 
 const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
@@ -810,9 +813,6 @@ export default function AquiferMonitor() {
     setSourceData('existing-dcs', dcsToGeoJSON(region.existingDCs || []))
     setSourceData('expansions', expansionsToGeoJSON(expansions))
 
-    if (map.getSource('wells-live')) {
-      map.getSource('wells-live').setData({ type: 'FeatureCollection', features: [] })
-    }
   }, [mapReady, region, expansions, derivedCenter, mapWellSites, region?.center, region?.depletionZones, region?.existingDCs, region?.rechargeZones, region?.zoom])
 
   // ── TOGGLE MAP LAYERS ────────────────────────────────────────────────────────
@@ -829,12 +829,12 @@ export default function AquiferMonitor() {
       map.setLayoutProperty('depletion-fill', 'visibility', vis(layers.depletion));
       map.setLayoutProperty('depletion-line', 'visibility', vis(layers.depletion));
     } catch { /* layer not ready yet */ }
-  }, [layers]);
+  }, [layers, mapReady]);
 
   // ── LIVE WELL DATA → MAP ─────────────────────────────────────────────────────
 useEffect(() => {
   const map = mapInstanceRef.current
-  if (!map || !map._layersReady || Object.keys(wellData).length === 0) return
+  if (!mapReady || !map || !map._layersReady) return
 
   const features = Object.values(wellData)
     .filter(w => w.isValid)
@@ -862,6 +862,7 @@ useEffect(() => {
       id: 'wells-live-layer',
       type: 'circle',
       source: 'wells-live',
+      layout: { visibility: layers.wells ? 'visible' : 'none' },
       paint: {
         'circle-radius': 9,
         'circle-color': ['get', 'color'],
@@ -888,7 +889,7 @@ useEffect(() => {
     map.on('mouseenter', 'wells-live-layer', () => { map.getCanvas().style.cursor = 'pointer' })
     map.on('mouseleave', 'wells-live-layer', () => { map.getCanvas().style.cursor = '' })
   }
-}, [wellData])
+}, [wellData, mapReady, layers.wells])
 
   // ── CHARTS ───────────────────────────────────────────────────────────────────
   const drawCharts = useCallback(() => {
