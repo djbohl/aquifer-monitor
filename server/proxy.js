@@ -5,7 +5,21 @@ import { checkBotId } from 'botid/server'
 import process from 'node:process'
 
 const app = express()
-app.use(cors())
+if (!process.env.VERCEL) app.use(cors())
+app.disable('x-powered-by')
+const usgs = axios.create({ timeout: 10000, maxContentLength: 5 * 1024 * 1024, maxRedirects: 0 })
+
+function upstreamError(res, err) {
+  console.error('USGS request failed:', err.message)
+  return res.status(502).json({ error: 'USGS data is temporarily unavailable' })
+}
+
+function validSites(sites, allowPrefix = false) {
+  if (typeof sites !== 'string' || sites.length > 200) return false
+  const pattern = allowPrefix ? /^(?:USGS-)?\d{8,15}$/ : /^\d{8,15}$/
+  const values = sites.split(',')
+  return values.length <= 10 && values.every((value) => pattern.test(value))
+}
 
 app.use('/api/usgs', async (req, res, next) => {
   if (!process.env.VERCEL) return next()
@@ -40,10 +54,14 @@ function toFipsStateCode(state) {
 // USGS New OGC API — groundwater levels
 app.get('/api/usgs/groundwater', async (req, res) => {
   const { state, limit } = req.query
+  if ((state !== undefined && (typeof state !== 'string' || !toFipsStateCode(state))) ||
+      (limit !== undefined && (typeof limit !== 'string' || !/^\d+$/.test(limit) || Number(limit) < 1 || Number(limit) > 100))) {
+    return res.status(400).json({ error: 'Invalid state or limit' })
+  }
   try {
     // New modernized USGS API (replaces legacy gwlevels endpoint)
     const url = `https://api.waterdata.usgs.gov/ogcapi/v0/collections/monitoring-locations/items`
-    const response = await axios.get(url, {
+    const response = await usgs.get(url, {
       params: {
         site_type: 'Well',
         state_code: toFipsStateCode(state) || STATE_FIPS.VA,
@@ -75,7 +93,7 @@ app.get('/api/usgs/groundwater', async (req, res) => {
 
     res.json({ wells })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    upstreamError(res, err)
   }
 })
 
@@ -83,9 +101,10 @@ app.get('/api/usgs/groundwater', async (req, res) => {
 // Parameter code 72019 = depth to water level below land surface
 app.get('/api/usgs/realtime', async (req, res) => {
   const { sites } = req.query
+  if (!validSites(sites, true)) return res.status(400).json({ error: 'Invalid sites' })
   try {
     const url = `https://api.waterdata.usgs.gov/ogcapi/v0/collections/timeseries/items`
-    const response = await axios.get(url, {
+    const response = await usgs.get(url, {
       params: {
         'monitoring-location-id': sites, // e.g. USGS-372428076561501
         'parameter-code': '72019',       // depth to water table
@@ -95,16 +114,19 @@ app.get('/api/usgs/realtime', async (req, res) => {
     })
     res.json(response.data)
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    upstreamError(res, err)
   }
 })
 
 // Legacy endpoint still works for instantaneous values (until deprecated)
 app.get('/api/usgs/iv', async (req, res) => {
   const { sites, parameterCd } = req.query
+  if (!validSites(sites) || (parameterCd !== undefined && (typeof parameterCd !== 'string' || !/^\d{5}$/.test(parameterCd)))) {
+    return res.status(400).json({ error: 'Invalid sites or parameter code' })
+  }
   try {
     const url = `https://waterservices.usgs.gov/nwis/iv/`
-    const response = await axios.get(url, {
+    const response = await usgs.get(url, {
       params: {
         sites,
         parameterCd: parameterCd || '72019',
@@ -114,7 +136,7 @@ app.get('/api/usgs/iv', async (req, res) => {
     })
     res.json(response.data)
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    upstreamError(res, err)
   }
 })
 

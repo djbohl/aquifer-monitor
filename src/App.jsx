@@ -7,11 +7,19 @@
 import { REGIONS } from './data/regions'
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useUSGSData } from "./hooks/useUSGS";
+import * as maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
+
+const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
+  '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+})[char]);
+const safePopupProperties = (properties) => Object.fromEntries(
+  Object.entries(properties).map(([key, value]) => [key, escapeHtml(value)])
+);
 
 // ─── STYLES ────────────────────────────────────────────────────────────────────
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap');
-  @import url('https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css');
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -690,16 +698,7 @@ export default function AquiferMonitor() {
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
 
-    // Dynamically load MapLibre
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css';
-    document.head.appendChild(link);
-
-    const script = document.createElement('script');
-    script.src = 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js';
-    script.onload = () => {
-      const maplibregl = window.maplibregl;
+    {
       const map = new maplibregl.Map({
         container: mapRef.current,
         style: {
@@ -764,7 +763,8 @@ export default function AquiferMonitor() {
         // Popups
         const addPopup = (layerId, formatFn) => {
           map.on('click', layerId, (e) => {
-            const props = e.features[0].properties;
+            const props = safePopupProperties(e.features[0].properties);
+            if (!/^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(props.color || '')) props.color = '#8A9BB0';
             new maplibregl.Popup({ closeButton: true, maxWidth: '260px' })
               .setLngLat(e.lngLat)
               .setHTML(formatFn(props))
@@ -782,8 +782,7 @@ export default function AquiferMonitor() {
         mapInstanceRef.current._layersReady = true;
         setMapReady(true)
       });
-    };
-    document.head.appendChild(script);
+    }
 
     return () => {
       setMapReady(false)
@@ -873,9 +872,8 @@ useEffect(() => {
     })
 
     // Popup for live wells
-    const maplibregl = window.maplibregl
     map.on('click', 'wells-live-layer', (e) => {
-      const p = e.features[0].properties
+      const p = safePopupProperties(e.features[0].properties)
       new maplibregl.Popup({ closeButton: true, maxWidth: '260px' })
         .setLngLat(e.lngLat)
         .setHTML(`
