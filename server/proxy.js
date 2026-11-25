@@ -1,9 +1,23 @@
 import express from 'express'
 import cors from 'cors'
 import axios from 'axios'
+import { checkBotId } from 'botid/server'
+import process from 'node:process'
 
 const app = express()
 app.use(cors())
+
+app.use('/api/usgs', async (req, res, next) => {
+  if (!process.env.VERCEL) return next()
+
+  try {
+    const { isBot } = await checkBotId({ advancedOptions: { headers: req.headers } })
+    if (isBot) return res.status(403).json({ error: 'Access denied' })
+    next()
+  } catch (err) {
+    next(err)
+  }
+})
 
 const STATE_FIPS = {
   AL: '01', AK: '02', AZ: '04', AR: '05', CA: '06', CO: '08', CT: '09',
@@ -104,4 +118,8 @@ app.get('/api/usgs/iv', async (req, res) => {
   }
 })
 
-app.listen(3001, () => console.log('USGS proxy running on port 3001'))
+if (!process.env.VERCEL) {
+  app.listen(3001, () => console.log('USGS proxy running on port 3001'))
+}
+
+export default app

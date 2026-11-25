@@ -3,7 +3,7 @@ import { PARAM_CODES } from '../data/regions'
 
 const DEFAULT_PROXY =
   (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_USGS_PROXY_URL) ||
-  'http://localhost:3001'
+  (import.meta.env.DEV ? 'http://localhost:3001' : '')
 const REFRESH_INTERVAL = 15 * 60 * 1000 // 15 minutes
 const DEFAULT_MAX_SITES = 60
 
